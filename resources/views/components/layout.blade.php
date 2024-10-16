@@ -12,6 +12,7 @@
 
         <!-- Content Wrapper. Contains page content -->
         {{ $slot }}
+        
         <!-- /.content-wrapper -->
 
         <!-- Control Sidebar -->

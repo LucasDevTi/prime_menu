@@ -1,0 +1,36 @@
+.paginacaoLaravel svg {
+    width: 20px !important;
+}
+
+.paginacaoLaravel nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.paginacaoLaravel nav>div:first-child {
+    display: none !important;
+}
+
+.paginacaoLaravel nav>div:last-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.content_legenda {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.legenda {
+    width: 35px;
+    height: 15px;
+}
+
+.content_legenda .card-title{
+    margin-left: 20px;
+    margin-right: 5px;
+}
