@@ -69,7 +69,8 @@
 
       <x-small_modal id="reserva-modal" titleModal="Reserva" textBtn="Continuar">
         <div class="modal-body">
-          <form>
+          <form id="telefoneForm" method="POST">
+            @csrf
             <div class="card-body">
               <div class="form-group">
                 <label for="telefone">Telefone/Celular</label>

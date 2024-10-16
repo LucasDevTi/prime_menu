@@ -1,21 +1,26 @@
-async function buscaCliente() {
-
-    let telefone = document.querySelector('#telefone').value();
+document.getElementById('telefoneForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    let url = '/buscar-cliente-telefone';
+    const csrfToken = document.querySelector('input[name="_token"]').value;
 
     try {
-        let url = '/buscar-cliente-telefone';
-
-        let response = await fetch(url);
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: formData
+        });
 
         if (response.ok) {
-            throw new (`Erro: ${response.error}`);
+            throw new (`ERRO: ${response.error}`);
         }
 
-        let data = await response.json();
-
+        const data = await response.json();
+        console.log(data);
     } catch (error) {
-        console.log(error);
+
     }
+});
 
-
-}
