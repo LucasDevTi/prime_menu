@@ -21,8 +21,8 @@ class Client extends Model
         'obs'
     ];
 
-    public function addresses(): BelongsToMany
+    public function address(): BelongsToMany
     {
-        return $this->belongsToMany(Addresses::class, 'client_address');
+        return $this->belongsToMany(Addresses::class, 'client_address', 'client_id', 'address_id');
     }
 }
