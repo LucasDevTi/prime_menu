@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('client_address', function (Blueprint $table) {
             $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
             $table->foreignId('address_id')->constrained('addresses')->onDelete('cascade');
+            $table->boolean('main')->default(false);
             $table->primary(['client_id', 'address_id']);
             $table->timestamps();
         });

@@ -13,6 +13,7 @@ class ClientAddress extends Model
 
     protected $fillable = [
         'client_id',
-        'address_id'
+        'address_id',
+        'main'
     ];
 }

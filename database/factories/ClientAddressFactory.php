@@ -24,6 +24,7 @@ class ClientAddressFactory extends Factory
         return [
             'client_id' => $client['id'],
             'address_id' => $address['id'],
+            'main' => fake()->boolean()
         ];
     }
 }

@@ -19,7 +19,8 @@ class Addresses extends Model
 
     public function clients(): BelongsToMany
     {
-        return $this->belongsToMany(Client::class, 'client_address', 'address_id', 'client_id');
+        return $this->belongsToMany(Client::class, 'client_address', 'address_id', 'client_id')
+                    ->withPivot('main');
     }
 
 
