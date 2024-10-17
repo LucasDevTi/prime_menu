@@ -30,8 +30,9 @@
                 <!-- <div class="d-flex justify-content-between"> -->
                 <div class="d-flex">
                   <div class="content_legenda">
-                    <x-legenda legenda="Liberada:" bgLegenda="info" />
-                    <x-legenda legenda="Ocupada:" bgLegenda="danger" />
+                  <x-legenda legenda="Liberada:" bgLegenda="success" />
+                    <x-legenda legenda="Ocupada:" bgLegenda="info" />
+                    <x-legenda legenda="Fechada:" bgLegenda="danger" />
                     <x-legenda legenda="Reservada:" bgLegenda="secondary" />
                     <x-legenda legenda="Inativa:" bgLegenda="warning" />
                   </div>

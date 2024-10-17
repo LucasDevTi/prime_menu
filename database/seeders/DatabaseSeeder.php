@@ -2,8 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Addresses;
+use App\Models\Client;
+use App\Models\ClientAddress;
 use App\Models\Mesa;
 use App\Models\User;
+use Database\Factories\ClientFactory;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -22,5 +26,11 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Mesa::factory(30)->create();
+
+        Client::factory(10)->create();
+
+        Addresses::factory(10)->create();
+
+        ClientAddress::factory(10)->create();
     }
 }
