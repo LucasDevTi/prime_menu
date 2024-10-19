@@ -8,18 +8,41 @@ use Illuminate\Http\Request;
 class ClientController extends Controller
 {
     public function findByCel(Request $request)
-    {
+    {   
         $request->validate([
             'telefone' => 'required|min:10|max:15'
         ]);
 
         $telefone = $request->input('telefone');
 
-        $telefone = preg_replace('/[^0-9]+/', '', $telefone);
+        // $telefone = preg_replace('/[^0-9]+/', '', $telefone);
 
-        $cliente = Client::where('telefone', '=', $telefone);
+        // $cliente = Client::where('cellphone', '=', $telefone)->first();
+        
+        $cliente = Client::with(['address' => function($query){
+            $query->wherePivot('main', true);
+        }])->where('cellphone', '=', $telefone)->first();
 
-        if ($cliente) {
+        if (empty($cliente)) {
+            $cliente = Client::where('phone_1', '=', $telefone)->first();
+
+            if (empty($cliente)) {
+                $cliente = Client::where('phone_2', '=', $telefone)->first();
+            }
+
+            if (empty($cliente)) {
+                return response()->json([
+                    'code' => 404,
+                    'success' => false,
+                    'message' => ['Cliente não encontrado'],
+                    'data' => $cliente
+                ], 404);
+            }
+        }
+        
+        if ($cliente && !empty($cliente)) {
+
+            
             return response()->json([
                 'code' => 200,
                 'success' => true,
@@ -27,5 +50,6 @@ class ClientController extends Controller
                 'data' => $cliente
             ], 200);
         }
+        
     }
 }

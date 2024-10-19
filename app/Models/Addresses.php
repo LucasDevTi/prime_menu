@@ -24,6 +24,13 @@ class Addresses extends Model
     }
 
 
+    public function clientsmain(): BelongsToMany
+    {
+        return $this->belongsToMany(Client::class, 'client_address', 'address_id', 'client_id')
+                    ->withPivot('main')
+                    ->wherePivot('main','=', 1);
+    }
+
     //     // Associar endereços a um usuário
     // $user = User::find(1);
     // $user->addresses()->attach([1, 2]); // Adiciona os endereços com ID 1 e 2

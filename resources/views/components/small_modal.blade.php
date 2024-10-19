@@ -7,14 +7,18 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            {{ $slot }}
-
+            <div class="overlay-wrapper">
+                <div class="overlay d-none">
+                    <i class="fas fa-2x fa-sync-alt fa-spin"></i>
+                </div>
+                {{ $slot }}
+            </div>
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
                 @if ($titleModal === 'Reserva')
-                    <button type="button" class="btn btn-primary" onclick="buscaCliente()">{{ $textBtn }}</button>
+                <button type="button" class="btn btn-primary" onclick="buscaCliente()">{{ $textBtn }}</button>
                 @else
-                    <button type="button" class="btn btn-primary">{{ $textBtn }}</button>
+                <button type="button" class="btn btn-primary">{{ $textBtn }}</button>
                 @endif
             </div>
         </div>

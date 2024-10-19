@@ -1,6 +1,5 @@
 <x-layout>
   <script src="{{asset('src/js/telefone.js')}}"></script>
-  <script src="{{asset('src/js/mesas/funcoes.js')}}"></script>
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <div class="content-header">
@@ -30,7 +29,7 @@
                 <!-- <div class="d-flex justify-content-between"> -->
                 <div class="d-flex">
                   <div class="content_legenda">
-                  <x-legenda legenda="Liberada:" bgLegenda="success" />
+                    <x-legenda legenda="Liberada:" bgLegenda="success" />
                     <x-legenda legenda="Ocupada:" bgLegenda="info" />
                     <x-legenda legenda="Fechada:" bgLegenda="danger" />
                     <x-legenda legenda="Reservada:" bgLegenda="secondary" />
@@ -69,20 +68,26 @@
       <!-- /.container-fluid -->
 
       <x-small_modal id="reserva-modal" titleModal="Reserva" textBtn="Continuar">
+
         <div class="modal-body">
-          <form id="telefoneForm" method="POST">
+          <form id="telefoneForm" method="POST" action="{{route('find-client-cel')}}">
             @csrf
             <div class="card-body">
               <div class="form-group">
                 <label for="telefone">Telefone/Celular</label>
-                <input type="text" class="form-control" id="telefone" placeholder="(xx) xxxxx-xxxx" maxlength="15" oninput="mascaraTelefone(this)">
+                <input type="text" class="form-control" id="telefone" name="telefone" placeholder="(xx) xxxxx-xxxx" maxlength="15" oninput="mascaraTelefone(this)">
               </div>
             </div>
           </form>
         </div>
+
       </x-small_modal>
+
+      <x-medium_modal />
     </div>
     <!-- /.content -->
   </div>
+  </div>
+  <script src="{{asset('src/js/mesas/funcoes.js')}}"></script>
 
 </x-layout>
