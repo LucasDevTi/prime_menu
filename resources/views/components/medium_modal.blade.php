@@ -14,7 +14,7 @@
                         <div class="row">
                             <div class="col-8">
                                 <label for="name">Nome</label>
-                                <input id="client_name" type="text" name="name" class="form-control">
+                                <input id="client_name" type="text" required name="name" class="form-control">
                             </div>
                             <div class="col-4">
                                 <label for="cpf_cnpj">CPF/CNPJ</label>
@@ -42,22 +42,27 @@
                         </div>
 
                         <div class="row mt-2">
-                            <div class="col-6">
+                            <!-- <div class="col-6">
                                 <label for="client_phone_1">Telefone 1</label>
                                 <input id="client_phone_1" type="text" name="client_phone_1" class="form-control" placeholder="(xx) xxxxx-xxxx" maxlength="15" oninput="mascaraTelefone(this)">
-                            </div>
+                            </div> -->
                             <div class="col-6">
                                 <label for="client_cellphone">Celular</label>
-                                <input type="text" class="form-control" id="client_cellphone" name="client_cellphone" placeholder="(xx) xxxxx-xxxx" maxlength="15" oninput="mascaraTelefone(this)">
+                                <input type="text" class="form-control" required id="client_cellphone" name="client_cellphone" placeholder="(xx) xxxxx-xxxx" maxlength="15" oninput="mascaraTelefone(this)">
                             </div>
-                        </div>
 
-                        <div class="row mt-2">
-                            <div class="col-12">
+                            <div class="col-6">
                                 <label for="client_email">Email</label>
                                 <input id="client_email" type="email" name="client_email" class="form-control">
                             </div>
                         </div>
+
+                        <!-- <div class="row mt-2">
+                            <div class="col-12">
+                                <label for="client_email">Email</label>
+                                <input id="client_email" type="email" name="client_email" class="form-control">
+                            </div>
+                        </div> -->
 
                         <div class="row mt-2">
                             <div class="col-12">

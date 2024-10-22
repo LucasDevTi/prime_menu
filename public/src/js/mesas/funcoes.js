@@ -24,38 +24,45 @@ async function buscaCliente() {
         }
         const data = await response.json();
         const client = data.data;
+        console.log(data);
 
-        console.log(data.data);
-        const inputNameclient = document.getElementById('client_name');
-        const inputCpfCnpj = document.getElementById('client_cpf_cnpj');
-        const inputRua = document.getElementById('client_rua');
-        const inputBairro = document.getElementById('client_bairro');
-        const inputNumber = document.getElementById('client_numero');
-        const inputComplemento = document.getElementById('client_complemento');
-        const inputPhone1 = document.getElementById('client_phone_1');
-        const inputCellphone = document.getElementById('client_cellphone');
-        const inputEmail = document.getElementById('client_email');
-        const inputObs = document.getElementById('client_obs');
+        if (data.data) {
+            console.log("Passou");
+            const inputNameclient = document.getElementById('client_name');
+            const inputCpfCnpj = document.getElementById('client_cpf_cnpj');
+            const inputRua = document.getElementById('client_rua');
+            const inputBairro = document.getElementById('client_bairro');
+            const inputNumber = document.getElementById('client_numero');
+            const inputComplemento = document.getElementById('client_complemento');
+            const inputPhone1 = document.getElementById('client_phone_1');
+            const inputCellphone = document.getElementById('client_cellphone');
+            const inputEmail = document.getElementById('client_email');
+            const inputObs = document.getElementById('client_obs');
 
-        // console.log(client.address[0]);
-        if (data.code == 200) {
+            // console.log(client.address[0]);
+            if (data.code == 200) {
+                console.log("ta aqui")
+                inputNameclient.value = (client.name) ? client.name : '';
+                inputCpfCnpj.value = (client.cpf_cnpj) ? client.cpf_cnpj : '';
+                
+                inputRua.value = (client.address[0].street) ? client.address[0].street : '';
+                inputBairro.value = (client.address[0].neighborhood) ? client.address[0].neighborhood : '';
+                inputNumber.value = (client.address[0].number) ? client.address[0].number : '';
+                
+                inputComplemento.value = (client.address[0].complement) ? client.address[0].complement : '';
+                // inputPhone1.value = (client.phone_1) ? client.phone_1 : '';
+                inputCellphone.value = (client.cellphone) ? client.cellphone : '';
 
-            inputNameclient.value = (client.name) ? client.name : '';
-            inputCpfCnpj.value = (client.cpf_cnpj) ? client.cpf_cnpj : '';
-
-            inputRua.value = (client.address[0].street) ? client.address[0].street : '';
-            inputBairro.value = (client.address[0].neighborhood) ? client.address[0].neighborhood : '';
-            inputNumber.value = (client.address[0].number) ? client.address[0].number : '';
-            inputComplemento.value = (client.address[0].complement) ? client.address[0].complement : '';
-            inputPhone1.value = (client.phone_1) ? client.phone_1 : '';
-            inputCellphone.value = (client.cellphone) ? client.cellphone : '';
-            inputEmail.value = (client.email) ? client.email : '';
-            inputObs.value = (client.obs) ? client.obs : '';
+                inputEmail.value = (client.email) ? client.email : '';
+                inputObs.value = (client.obs) ? client.obs : '';
+                
+            }
         }
-
+        
         overlay.classList.add('d-none');
         $('#reserva-modal').modal('hide');
         $('#continua-reserva-cliente').modal('show');
+        
     } catch (error) {
         overlay.classList.add('d-none');
     }

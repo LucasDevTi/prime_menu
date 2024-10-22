@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class ClientController extends Controller
 {
     public function findByCel(Request $request)
-    {   
+    {
         $request->validate([
             'telefone' => 'required|min:10|max:15'
         ]);
@@ -18,31 +18,35 @@ class ClientController extends Controller
         // $telefone = preg_replace('/[^0-9]+/', '', $telefone);
 
         // $cliente = Client::where('cellphone', '=', $telefone)->first();
-        
-        $cliente = Client::with(['address' => function($query){
+
+        $cliente = Client::with(['address' => function ($query) {
             $query->wherePivot('main', true);
         }])->where('cellphone', '=', $telefone)->first();
 
         if (empty($cliente)) {
-            $cliente = Client::where('phone_1', '=', $telefone)->first();
+            $cliente = Client::with(['address' => function ($query) {
+                $query->wherePivot('main', true);
+            }])->where('phone_1', '=', $telefone)->first();
 
             if (empty($cliente)) {
-                $cliente = Client::where('phone_2', '=', $telefone)->first();
+                $cliente = Client::with(['address' => function($query){
+                    $query->wherePivot('main', true);
+                }])->where('phone_2', '=', $telefone)->first();
             }
 
             if (empty($cliente)) {
                 return response()->json([
-                    'code' => 404,
+                    'code' => 200,
                     'success' => false,
                     'message' => ['Cliente não encontrado'],
                     'data' => $cliente
-                ], 404);
+                ], 200);
             }
         }
-        
+
         if ($cliente && !empty($cliente)) {
 
-            
+
             return response()->json([
                 'code' => 200,
                 'success' => true,
@@ -50,6 +54,5 @@ class ClientController extends Controller
                 'data' => $cliente
             ], 200);
         }
-        
     }
 }
