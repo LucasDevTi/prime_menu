@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string(column: 'email')->nullable();
             $table->string(column: 'cpf_cnpj')->nullable();
             $table->string(column: 'phone_1')->nullable();
-            $table->string(column: 'phone_2')->nullable();
             $table->string(column: 'cellphone')->nullable();
             $table->date(column: 'birth_date')->nullable();
             $table->text(column: 'obs')->nullable();
