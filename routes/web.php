@@ -16,4 +16,4 @@ Route::get('/gestao', [HomeController::class, 'index'])->name('gestao');
 // Route::get('/register', [AuthController::class, 'register'])->name('register');
 
 Route::post('/buscar-cliente-telefone', [ClientController::class, 'findByCel'])->name('find-client-cel');
-Route::post('/setreserva',[ReservaController::class, 'setReserva'])->name('setReserva');
+//Route::post('/setreserva',[ReservaController::class, 'setReserva'])->name('setReserva');

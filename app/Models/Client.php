@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Client extends Model
 {
@@ -15,22 +14,18 @@ class Client extends Model
         'email',
         'cpf_cnpj',
         'phone_1',
-        'phone_2',
         'cellphone',
         'birth_date',
         'obs'
     ];
 
-    public function address(): BelongsToMany
+    public function addresses()
     {
-        return $this->belongsToMany(Addresses::class, 'client_address', 'client_id', 'address_id')
-                    ->withPivot('main');
+        return $this->hasMany(Address::class);
     }
 
-    public function addressmain(): BelongsToMany
+    public function addressPrimary()
     {
-        return $this->belongsToMany(Addresses::class, 'client_address', 'client_id', 'address_id')
-                    ->withPivot('main')
-                    ->wherePivot('main', '=', 1);
+        return $this->hasOne(Address::class)->where('is_primary', true)->first();
     }
 }
