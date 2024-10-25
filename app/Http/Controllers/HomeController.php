@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Mesa;
+use App\Models\Table;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        $mesas = Mesa::paginate(60);
+        $tables = Table::paginate(60);
         $data = [
-            'mesas' => $mesas
+            'mesas' => $tables
         ];
         return view('gestao', $data);
     }
