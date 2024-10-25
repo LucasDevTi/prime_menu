@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Address;
 use App\Models\Client;
+use App\Models\Table;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -23,6 +24,6 @@ class DatabaseSeeder extends Seeder
 
         Client::factory(10)->create();
         Address::factory(10)->create();
-
+        Table::factory(40)->create();
     }
 }

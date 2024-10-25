@@ -49,7 +49,7 @@
                 <div class="row">
 
                   @foreach ($mesas as $mesa)
-                  <x-mesa :id="$mesa->id" :situacao="$mesa->situacao" />
+                  <x-mesa :id="$mesa->id" :status="$mesa->status" />
                   @endforeach
 
                 </div>

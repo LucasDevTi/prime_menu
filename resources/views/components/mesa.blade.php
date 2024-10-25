@@ -1,11 +1,11 @@
 <?php
-    if($situacao == '0'){
+    if($status == '0'){
         $bgColor = 'info';
-    }else if($situacao == '1'){
+    }else if($status == '1'){
         $bgColor = 'secondary';
-    }else if($situacao == '2'){
+    }else if($status == '2'){
         $bgColor = 'danger';
-    }else if($situacao == '3'){
+    }else if($status == '3'){
         $bgColor = 'danger';
     }else {
         $bgColor = 'success';
