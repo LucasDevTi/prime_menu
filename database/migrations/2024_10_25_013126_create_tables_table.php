@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tables', function (Blueprint $table) {
             $table->id();
             $table->string('table_number')->nullable();
-            $table->integer('linked_table_id')->nullable();
+            $table->foreignId('linked_table_id')->nullable()->constrained('tables')->onDelete('set null');
             $table->integer('status')->nullable();
             $table->integer('description_status')->nullable();
             $table->timestamps();
