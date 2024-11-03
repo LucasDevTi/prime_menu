@@ -1,14 +1,14 @@
 <?php
     if($status == '0'){
-        $bgColor = 'info';
+        $bgColor = 'success';
     }else if($status == '1'){
-        $bgColor = 'secondary';
+        $bgColor = 'info';
     }else if($status == '2'){
         $bgColor = 'danger';
     }else if($status == '3'){
-        $bgColor = 'danger';
+        $bgColor = 'secondary';
     }else {
-        $bgColor = 'success';
+        $bgColor = 'warning';
     }
 ?>
 

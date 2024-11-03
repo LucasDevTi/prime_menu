@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\Table;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
@@ -14,7 +15,6 @@ class ClientController extends Controller
         ]);
 
 
-
         $telefone = $request->input('telefone');
         $message = '';
 
@@ -23,22 +23,29 @@ class ClientController extends Controller
         }])->where('cellphone', '=', $telefone)->first();
 
         if (empty($cliente)) {
+
             $cliente = Client::with(['addresses' => function ($query) {
                 $query->where('is_primary', true);
             }])->where('phone_1', '=', $telefone)->first();
 
             if (empty($cliente)) {
                 $message = 'Cliente não encontrado';
+                $cliente = [];
             }
         }
 
-        if ($cliente && !empty($cliente)) {
-            return response()->json([
-                'code' => 200,
-                'success' => true,
-                'message' => $message,
-                'data' => $cliente
-            ], 200);
+        $tables = Table::where('status', 0)->get();
+        
+        if (empty($tables)) {
+            $tables = [];
         }
+
+        return response()->json([
+            'code' => 200,
+            'success' => true,
+            'message' => $message,
+            'data' => $cliente,
+            'tables' => $tables
+        ], 200);
     }
 }

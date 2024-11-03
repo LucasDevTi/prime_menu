@@ -7,14 +7,16 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <form id="clienteForm" method="POST" action="{{route('setReserva')}}">
-                    @csrf
+            <form id="clienteForm" method="POST" action="{{route('setReserva')}}">
+                @csrf
+                <div class="modal-body">
+
+
                     <div class="card-body">
                         <div class="row">
                             <div class="col-8">
                                 <label for="name">Nome</label>
-                                <input id="client_name" type="text" required name="name" class="form-control">
+                                <input id="client_name" type="text" required name="name" class="form-control" required>
                             </div>
                             <div class="col-4">
                                 <label for="cpf_cnpj">CPF/CNPJ</label>
@@ -75,23 +77,20 @@
                             <div class="col-12">
                                 <div class="form-group">
                                     <label>Mesa</label>
-                                    <select class="form-control">
+                                    <select class="form-control" id="mesas-disponiveis">
                                         <option selected value="0">Selecione</option>
-                                        <option>option 2</option>
-                                        <option>option 3</option>
-                                        <option>option 4</option>
-                                        <option>option 5</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary">Reservar</button>
-            </div>
+
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-primary">Reservar</button>
+                </div>
+            </form>
         </div>
         <!-- /.modal-content -->
     </div>

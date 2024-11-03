@@ -31,7 +31,7 @@ class TableFactory extends Factory
                 $descriptionStatus = "Reservada";
                 break;
             case 4:
-                $descriptionStatus = "Inatoiva";
+                $descriptionStatus = "Inativa";
                 break;
             default:
                 $descriptionStatus = "teste";
