@@ -50,7 +50,7 @@
                             </div> -->
                             <div class="col-6">
                                 <label for="client_cellphone">Celular</label>
-                                <input type="text" class="form-control" required id="client_cellphone" name="client_cellphone" placeholder="(xx) xxxxx-xxxx" maxlength="15" oninput="mascaraTelefone(this)">
+                                <input type="text" class="form-control" required id="client_cellphone" name="client_cellphone" placeholder="(xx) xxxxx-xxxx" maxlength="15" oninput="mascaraTelefone(this)" required>
                             </div>
 
                             <div class="col-6">
@@ -77,7 +77,7 @@
                             <div class="col-12">
                                 <div class="form-group">
                                     <label>Mesa</label>
-                                    <select class="form-control" id="mesas-disponiveis">
+                                    <select class="form-control" id="mesas-disponiveis" name="mesas_disponiveis">
                                         <option selected value="0">Selecione</option>
                                     </select>
                                 </div>
