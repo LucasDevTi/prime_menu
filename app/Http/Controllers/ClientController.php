@@ -13,6 +13,8 @@ class ClientController extends Controller
             'telefone' => 'required|min:10|max:15'
         ]);
 
+
+
         $telefone = $request->input('telefone');
         $message = '';
 

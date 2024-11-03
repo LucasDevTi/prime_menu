@@ -5,7 +5,7 @@ async function buscaCliente() {
     const csrfToken = document.querySelector('input[name="_token"]').value;
 
     const overlay = document.querySelector('.overlay');
-
+   
     try {
         overlay.classList.remove('d-none');
         const response = await fetch(form.action, {
@@ -15,7 +15,7 @@ async function buscaCliente() {
             },
             body: formData
         });
-
+       
         if (!response.ok) {
             // Se a resposta não for ok, lança um erro
             const errorData = await response.json();
@@ -24,10 +24,8 @@ async function buscaCliente() {
         }
         const data = await response.json();
         const client = data.data;
-        console.log(data);
 
         if (data.data) {
-            console.log("Passou");
             const inputNameclient = document.getElementById('client_name');
             const inputCpfCnpj = document.getElementById('client_cpf_cnpj');
             const inputRua = document.getElementById('client_rua');
@@ -41,15 +39,18 @@ async function buscaCliente() {
 
             // console.log(client.address[0]);
             if (data.code == 200) {
-                console.log("ta aqui")
+                
+
                 inputNameclient.value = (client.name) ? client.name : '';
                 inputCpfCnpj.value = (client.cpf_cnpj) ? client.cpf_cnpj : '';
                 
-                inputRua.value = (client.address[0].street) ? client.address[0].street : '';
-                inputBairro.value = (client.address[0].neighborhood) ? client.address[0].neighborhood : '';
-                inputNumber.value = (client.address[0].number) ? client.address[0].number : '';
+                inputRua.value = (client.addresses[0].street) ? client.addresses[0].street : '';
+
+                inputBairro.value = (client.addresses[0].neighborhood) ? client.addresses[0].neighborhood : '';
+
+                inputNumber.value = (client.addresses[0].number) ? client.addresses[0].number : '';
                 
-                inputComplemento.value = (client.address[0].complement) ? client.address[0].complement : '';
+                inputComplemento.value = (client.addresses[0].complement) ? client.addresses[0].complement : '';
                 // inputPhone1.value = (client.phone_1) ? client.phone_1 : '';
                 inputCellphone.value = (client.cellphone) ? client.cellphone : '';
 
@@ -58,7 +59,6 @@ async function buscaCliente() {
                 
             }
         }
-        
         overlay.classList.add('d-none');
         $('#reserva-modal').modal('hide');
         $('#continua-reserva-cliente').modal('show');
