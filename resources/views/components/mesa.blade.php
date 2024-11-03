@@ -1,19 +1,19 @@
 <?php
-    if($status == '0'){
-        $bgColor = 'success';
-    }else if($status == '1'){
-        $bgColor = 'info';
-    }else if($status == '2'){
-        $bgColor = 'danger';
-    }else if($status == '3'){
-        $bgColor = 'secondary';
-    }else {
-        $bgColor = 'warning';
-    }
+if ($status == '0') {
+    $bgColor = 'success';
+} else if ($status == '1') {
+    $bgColor = 'info';
+} else if ($status == '2') {
+    $bgColor = 'danger';
+} else if ($status == '3') {
+    $bgColor = 'secondary';
+} else {
+    $bgColor = 'warning';
+}
 ?>
 
 <div class="col-md-2 col-sm-6 col-12" style="cursor:pointer;">
-    <div class="info-box bg-gradient-{{$bgColor}}">
+    <div class="info-box bg-gradient-{{$bgColor}} mesa" data-id-mesa="{{$id}}" onclick="acaoMesa('{{$id}}', '{{$status}}')">
         <span class="info-box-icon">{{$id}}</i></span>
 
         <div class="info-box-content align-items-end">

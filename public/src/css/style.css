@@ -30,7 +30,20 @@
     height: 15px;
 }
 
+.content_legenda{
+    flex-wrap: wrap;
+}
+
 .content_legenda .card-title{
     margin-left: 20px;
     margin-right: 5px;
 }
+
+.mesa {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+ }
+ 
+ .mesa:hover {
+    transform: translateY(-5px); /* Move o elemento 5px para cima */
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3); /* Sombra mais acentuada */
+ }  

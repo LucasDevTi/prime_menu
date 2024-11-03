@@ -34,7 +34,7 @@
                                 <input id="client_bairro" type="text" name="bairro" class="form-control">
                             </div>
                             <div class="col-2">
-                                <label for="numero">Número</label>
+                                <label for="numero">N°</label>
                                 <input id="client_numero" type="number" name="numero" class="form-control">
                             </div>
                             <div class="col-2">

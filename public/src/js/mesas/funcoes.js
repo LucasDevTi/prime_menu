@@ -17,8 +17,6 @@ async function buscaCliente() {
         });
 
         if (!response.ok) {
-            console.log("passou");
-
             // Se a resposta não for ok, lança um erro
             const errorData = await response.json();
             throw new Error(`ERRO: ${errorData.message}`);
@@ -80,8 +78,8 @@ async function buscaCliente() {
                 option.textContent = `Mesa: ${table.id} - ${table.description_status}`;    // Define o texto como o status da mesa
                 selectMesas.appendChild(option);                  // Adiciona a opção ao <select>
             });
-            
-            console.log(tables); 
+
+            console.log(tables);
         }
         // }
         overlay.classList.add('d-none');
@@ -91,7 +89,80 @@ async function buscaCliente() {
     } catch (error) {
         overlay.classList.add('d-none');
     }
-
-
 }
 
+
+/* async function buscaEstadoMesa(mesa_id) {
+    try {
+        const response = await fetch(`/get-status-mesa?mesa_id=${mesa_id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`ERRO: ${errorData.message}`);
+        }
+
+        const data = await response.json();
+        console.log(data.status); // Aqui você pode manipular a resposta como desejar
+
+        if(data.status === 0){
+            console.log("liberada");
+        }
+
+    } catch (error) {
+        console.error(error); // Lidar com o erro aqui
+    }
+}
+*/
+
+async function atualizarStatusMesa(mesa_id) {
+
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const mesa = document.querySelector(`div[data-id-mesa="${mesa_id}"]`);
+
+    try {
+        const response = await fetch('/atualizar-status-mesa', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token, // Inclua o token CSRF para segurança
+            },
+            body: JSON.stringify({ mesa_id: mesa_id, novo_status: 1 }) // Exemplo de novo status
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`ERRO: ${errorData.message}`);
+        }
+
+        const data = await response.json();
+
+        if(data.success){
+            mesa.setAttribute('onClick', `acaoMesa('${mesa_id}','1')`);
+            mesa.className = '';
+            mesa.classList.add('info-box', 'bg-gradient-info', 'mesa');
+        }
+
+        // Aqui você pode fazer algo após a atualização, como recarregar a lista de mesas
+
+    } catch (error) {
+        console.error('Erro ao atualizar o status da mesa:', error);
+    }
+}
+
+
+function acaoMesa(mesa_id, status) {
+
+    console.log(status);
+    if (status === "0") {
+        const TableConfirm = confirm("Deseja ocupar essa mesa?");
+        if (TableConfirm) {
+            atualizarStatusMesa(mesa_id)
+        }
+    }
+    // buscaEstadoMesa(mesa_id);
+}
