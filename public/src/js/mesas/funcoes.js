@@ -30,7 +30,6 @@ async function buscaCliente() {
         const selectMesas = document.getElementById('mesas-disponiveis');
         selectMesas.innerHTML = '<option selected value="0">Selecione</option>';
 
-        // if (data.data) {
         const inputNameclient = document.getElementById('client_name');
         const inputCpfCnpj = document.getElementById('client_cpf_cnpj');
         const inputRua = document.getElementById('client_rua');
@@ -42,7 +41,6 @@ async function buscaCliente() {
         const inputEmail = document.getElementById('client_email');
         const inputObs = document.getElementById('client_obs');
 
-        // console.log(client.address[0]);
         if (data.code == 200) {
 
             inputNameclient.value = (client.name) ? client.name : '';
@@ -67,7 +65,6 @@ async function buscaCliente() {
                 inputComplemento.value = '';
             }
 
-            // inputPhone1.value = (client.phone_1) ? client.phone_1 : '';
             inputCellphone.value = (client.cellphone) ? client.cellphone : '';
             inputEmail.value = (client.email) ? client.email : '';
             inputObs.value = (client.obs) ? client.obs : '';
@@ -78,8 +75,6 @@ async function buscaCliente() {
                 option.textContent = `Mesa: ${table.id} - ${table.description_status}`;    // Define o texto como o status da mesa
                 selectMesas.appendChild(option);                  // Adiciona a opção ao <select>
             });
-
-            console.log(tables);
         }
         // }
         overlay.classList.add('d-none');
@@ -91,35 +86,7 @@ async function buscaCliente() {
     }
 }
 
-
-/* async function buscaEstadoMesa(mesa_id) {
-    try {
-        const response = await fetch(`/get-status-mesa?mesa_id=${mesa_id}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`ERRO: ${errorData.message}`);
-        }
-
-        const data = await response.json();
-        console.log(data.status); // Aqui você pode manipular a resposta como desejar
-
-        if(data.status === 0){
-            console.log("liberada");
-        }
-
-    } catch (error) {
-        console.error(error); // Lidar com o erro aqui
-    }
-}
-*/
-
-async function atualizarStatusMesa(mesa_id) {
+async function atualizarStatusMesa(mesa_id, status) {
 
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const mesa = document.querySelector(`div[data-id-mesa="${mesa_id}"]`);
@@ -131,20 +98,22 @@ async function atualizarStatusMesa(mesa_id) {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': token, // Inclua o token CSRF para segurança
             },
-            body: JSON.stringify({ mesa_id: mesa_id, novo_status: 1 }) // Exemplo de novo status
+            body: JSON.stringify({ mesa_id: mesa_id, novo_status: status }) // Exemplo de novo status
         });
 
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(`ERRO: ${errorData.message}`);
         }
+        console.log(response.json);
 
         const data = await response.json();
 
-        if(data.success){
-            mesa.setAttribute('onClick', `acaoMesa('${mesa_id}','1')`);
-            mesa.className = '';
-            mesa.classList.add('info-box', 'bg-gradient-info', 'mesa');
+        if (data.success) {
+
+            $('#opcoes_mesa').modal('hide');
+
+            enableOptionTable(mesa, mesa_id, data.status)
         }
 
         // Aqui você pode fazer algo após a atualização, como recarregar a lista de mesas
@@ -154,15 +123,97 @@ async function atualizarStatusMesa(mesa_id) {
     }
 }
 
-
-function acaoMesa(mesa_id, status) {
-
-    console.log(status);
-    if (status === "0") {
-        const TableConfirm = confirm("Deseja ocupar essa mesa?");
-        if (TableConfirm) {
-            atualizarStatusMesa(mesa_id)
-        }
-    }
-    // buscaEstadoMesa(mesa_id);
+function disableOptionTable(table) {
+    table.removeAttribute('onClick');
+    table.className = '';
+    table.classList.add('info-box', 'bg-gradient-secondary', 'btn-opcoes-mesa');
 }
+
+function enableOptionTable(table, table_id, status) {
+    if (status === "0") {
+        table.className = '';
+        table.classList.add('info-box', 'bg-gradient-success', 'mesa');
+    } else if (status === "1") {
+        table.className = '';
+        table.classList.add('info-box', 'bg-gradient-info', 'mesa');
+    } else if (status === "4") {
+        table.className = '';
+        table.classList.add('info-box', 'bg-gradient-warning', 'mesa');
+    }
+    table.setAttribute('onClick', `showModalOptionsTable('${table_id}','${status}')`);
+
+}
+
+function showModalOptionsTable(mesa_id, status) {
+
+    const mesaOcupar = document.querySelector('#div-ocupar-mesa');
+    const mesaVincular = document.querySelector('#div-vincular-mesa');
+    const mesaFechar = document.querySelector('#div-fechar-mesa');
+    const mesaTrocar = document.querySelector('#div-trocar-mesa');
+    const mesaPagar = document.querySelector('#div-pagar-mesa');
+    const mesaInativar = document.querySelector('#div-inativar-mesa');
+
+    // Define padrão as classes
+    mesaOcupar.className = '';
+    mesaOcupar.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
+
+    mesaVincular.className = '';
+    mesaVincular.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
+
+    mesaFechar.className = '';
+    mesaFechar.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
+
+    mesaTrocar.className = '';
+    mesaTrocar.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
+
+    mesaPagar.className = '';
+    mesaPagar.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
+
+    mesaInativar.className = '';
+    mesaInativar.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
+    document.querySelector('#text-ativacao').innerHTML = "Inativar";
+
+    mesaInativar.setAttribute('onClick', `changeStatusTable('${mesa_id}','4')`);
+
+    if (status === "0" || status === "3") {
+
+        mesaOcupar.setAttribute('onClick', `changeStatusTable('${mesa_id}','1')`);
+
+        disableOptionTable(mesaVincular);
+        disableOptionTable(mesaFechar);
+        disableOptionTable(mesaTrocar);
+        disableOptionTable(mesaPagar);
+
+    } else if (status === "1") {
+        disableOptionTable(mesaOcupar);
+        disableOptionTable(mesaPagar);
+        disableOptionTable(mesaInativar);
+    } else if (status === "2") {
+        disableOptionTable(mesaOcupar);
+        disableOptionTable(mesaFechar);
+        disableOptionTable(mesaVincular);
+        disableOptionTable(mesaTrocar);
+        disableOptionTable(mesaInativar);
+    } else if (status === "4") {
+        document.querySelector('#text-ativacao').innerHTML = "Ativar";
+        mesaInativar.setAttribute('onClick', `changeStatusTable('${mesa_id}','0')`);
+
+        disableOptionTable(mesaOcupar);
+        disableOptionTable(mesaVincular);
+        disableOptionTable(mesaFechar);
+        disableOptionTable(mesaTrocar);
+        disableOptionTable(mesaPagar);
+    }
+    // else if(status === "1"){
+    //     mesaOcupar.removeAttribute('onClick');
+    //     mesaOcupar.className = '';
+    //     mesaOcupar.classList.add('info-box', 'bg-gradient-secondary', 'btn-opcoes-mesa');
+    // }
+
+    $('#opcoes_mesa').modal('show');
+}
+
+function changeStatusTable(mesa_id, status) {
+    atualizarStatusMesa(mesa_id, status);
+}
+

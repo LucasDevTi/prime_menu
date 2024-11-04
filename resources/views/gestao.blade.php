@@ -94,6 +94,8 @@
       </x-small_modal>
 
       <x-medium_modal />
+
+      <x-opcoes_mesas />
     </div>
     <!-- /.content -->
   </div>

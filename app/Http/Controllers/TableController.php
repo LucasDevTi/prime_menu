@@ -32,16 +32,37 @@ class TableController extends Controller
     {
         $request->validate([
             'mesa_id' => 'required|exists:tables,id',
-            'novo_status' => 'required|boolean', // Defina o novo status que você espera
+            'novo_status' => 'required|integer', // Defina o novo status que você espera
         ]);
 
         $mesa = Table::find($request->mesa_id);
-        $mesa->status = $request->novo_status;
-        $mesa->save();
 
-        return response()->json([
-            'message' => 'Status atualizado com sucesso!',
-            'success' => true
-        ], 200);
+        if ($request->novo_status == 0) {
+            $mesa->description_status = "Liberada";
+        } else if ($request->novo_status == 1) {
+            $mesa->description_status = "Ocupada";
+        } else if ($request->novo_status == 2) {
+            $mesa->description_status = "Fechada";
+        } else if ($request->novo_status == 3) {
+            $mesa->description_status = "Reservada";
+        } else if ($request->novo_status == 4) {
+            $mesa->description_status = "Inativa";
+        }
+
+        $mesa->status = $request->novo_status;
+
+        if ($mesa->save()) {
+            return response()->json([
+                'message' => 'Status atualizado com sucesso!',
+                'success' => true,
+                'status' => $mesa->status
+            ], 200);
+        } else {
+            return response()->json([
+                'message'   => 'Houve um erro ao mudar o status da mesa',
+                'success'   => false,
+                'status'    => ''
+            ], 404);
+        }
     }
 }
