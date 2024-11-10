@@ -16,13 +16,13 @@
                         <i class="fas fa-user-plus"></i>
                         <span class="info-box-text">Abrir</span>
                     </div>
-                    @if (auth()->user()->user_type != 2)
+                    <!-- @if (auth()->user()->user_type != 2)
                     <div id="div-vincular-mesa" class="info-box bg-gradient-info btn-opcoes-mesa">
                         <i class="fa fa-link" aria-hidden="true"></i>
                         <span class="info-box-text">Juntar</span>
                         <span class="info-box-text">mesas</span>
                     </div>
-                    @endif
+                    @endif -->
 
                     <div id="div-fechar-mesa" class="info-box bg-gradient-info btn-opcoes-mesa">
                         <i class="fa fa-hashtag" aria-hidden="true"></i>
