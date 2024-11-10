@@ -21,3 +21,6 @@ Route::post('/setreserva', [ReservationController::class, 'setReserva'])->name('
 Route::get('/get-status-mesa', [TableController::class, 'getStatusMesa'])->name('get-status-mesa');
 Route::post('/atualizar-status-mesa', [TableController::class, 'atualizarStatusMesa'])->name('atualizar-status-mesa');
 
+Route::post('/link-tables', [TableController::class, 'linkTables'])->name('link-tables');
+
+

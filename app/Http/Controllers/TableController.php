@@ -40,7 +40,7 @@ class TableController extends Controller
         if ($request->novo_status == 0) {
             $mesa->description_status = "Liberada";
         } else if ($request->novo_status == 1) {
-            $mesa->description_status = "Ocupada";
+            $mesa->description_status = "Aberta";
         } else if ($request->novo_status == 2) {
             $mesa->description_status = "Fechada";
         } else if ($request->novo_status == 3) {
@@ -64,5 +64,9 @@ class TableController extends Controller
                 'status'    => ''
             ], 404);
         }
+    }
+
+    public function linkTables(){
+        
     }
 }

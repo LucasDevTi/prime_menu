@@ -40,12 +40,13 @@
     margin-right: 15px;
 }
 
-.div-legenda{
+.div-legenda {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: row-reverse;
 }
+
 .mesa {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -67,13 +68,51 @@
     align-items: center;
 }
 
-.btn-opcoes-mesa i{
+.btn-opcoes-mesa i {
     font-size: 30px;
 }
 
-.content-option{
+.content-option {
     cursor: pointer;
     display: flex;
     justify-content: space-around;
     align-items: center;
 }
+
+.div-tables {
+    cursor: pointer;
+    margin-right: 10px;
+    width: 180px
+}
+
+.mesa-selecionada {
+    border: 3px solid #FF4500;  /* Cor de borda mais forte (laranja escuro) */
+    background-color: rgba(255, 69, 0, 0.3); /* Fundo semi-transparente */
+    box-shadow: 0px 0px 10px 3px rgba(255, 69, 0, 0.6); /* Sombra intensa */
+    transform: scale(1.05);  /* Aumenta um pouco o tamanho da mesa para dar destaque */
+    
+}
+
+@media(max-width:690px) {
+    .div-tables {
+        width: 100px;
+    }
+
+    .info-box .info-box-icon {
+        width: 20px;
+    }
+}
+
+@media(max-width:390px) {
+    .div-tables {
+        width: 80px;
+        font-size: 13px;
+    }
+
+    .info-box .info-box-icon {
+        width: 5px;
+        font-size: 25px;
+    }
+    
+}
+

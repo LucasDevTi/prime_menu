@@ -14,39 +14,51 @@
                 <div class="col-12 content-option" style="cursor:pointer;">
                     <div id="div-ocupar-mesa" class="info-box bg-gradient-info btn-opcoes-mesa">
                         <i class="fas fa-user-plus"></i>
-                        <span class="info-box-text">Ocupar</span>
+                        <span class="info-box-text">Abrir</span>
                     </div>
-
-                    <div id="div-vincular-mesa" class="info-box bg-gradient-info btn-opcoes-mesa" onclick="acaoMesa('2', '3')">
+                    @if (auth()->user()->user_type != 2)
+                    <div id="div-vincular-mesa" class="info-box bg-gradient-info btn-opcoes-mesa">
                         <i class="fa fa-link" aria-hidden="true"></i>
-                        <span class="info-box-text">Vincular</span>
+                        <span class="info-box-text">Juntar</span>
                         <span class="info-box-text">mesas</span>
-
                     </div>
+                    @endif
 
-                    <div id="div-fechar-mesa" class="info-box bg-gradient-info btn-opcoes-mesa" onclick="acaoMesa('2', '3')">
+                    <div id="div-fechar-mesa" class="info-box bg-gradient-info btn-opcoes-mesa">
                         <i class="fa fa-hashtag" aria-hidden="true"></i>
                         <span class="info-box-text">Fechar</span>
                     </div>
                 </div>
 
                 <div class="col-12 content-option" style="cursor:pointer;">
+                    @if (auth()->user()->user_type != 2)
                     <div id="div-trocar-mesa" class="info-box bg-gradient-info btn-opcoes-mesa" onclick="acaoMesa('2', '3')">
                         <i class="fa fa-arrow-left" aria-hidden="true"></i>
                         <span class="info-box-text">Trocar de</span>
                         <span class="info-box-text">mesa</span>
                     </div>
+                    @endif
 
+                    @if (auth()->user()->user_type != 2 && auth()->user()->user_type != 3)
                     <div id="div-pagar-mesa" class="info-box bg-gradient-info btn-opcoes-mesa" onclick="acaoMesa('2', '3')">
                         <i class="fa fa-credit-card" aria-hidden="true"></i>
                         <span class="info-box-text">Pagar</span>
                     </div>
+                    @endif
 
+                    @if (auth()->user()->user_type != 2 && auth()->user()->user_type != 3)
                     <div id="div-inativar-mesa" class="info-box bg-gradient-info btn-opcoes-mesa">
                         <i class="fa fa-ban" aria-hidden="true"></i>
                         <span id="text-ativacao" class="info-box-text">Inativar</span>
                         <span class="info-box-text">mesa</span>
                     </div>
+                    @endif
+                </div>
+
+                <div class="col-12 content-option" style="cursor:pointer;">
+                    <select class="form-control" id="vincular-mesas-disponiveis" name="vincular-mesas-disponiveis" style="width: 95%; display:none;">
+                        <option selected value="0">Selecione</option>
+                    </select>
                 </div>
             </div>
             <div class="modal-footer justify-content-between">

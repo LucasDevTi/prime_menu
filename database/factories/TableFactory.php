@@ -22,7 +22,7 @@ class TableFactory extends Factory
                 $descriptionStatus = "Liberada";
                 break;
             case 1:
-                $descriptionStatus = "Ocupada";
+                $descriptionStatus = "Aberta";
                 break;
             case 2:
                 $descriptionStatus = "Fechada";

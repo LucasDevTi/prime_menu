@@ -12,8 +12,11 @@ if ($status == '0') {
 }
 ?>
 
-<div class="col-md-2 col-sm-6 col-12" style="cursor:pointer;">
-    <div class="info-box bg-gradient-{{$bgColor}} mesa" data-id-mesa="{{$id}}" onclick="showModalOptionsTable('{{$id}}', '{{$status}}')">
+<div class="div-tables">
+    <div class="info-box bg-gradient-{{$bgColor}} mesa"
+        data-id-mesa="{{$id}}"
+        data-status="{{$status}}"
+        onclick="acaoMesa(this)">
         <span class="info-box-icon">{{$id}}</i></span>
 
         <div class="info-box-content align-items-end">

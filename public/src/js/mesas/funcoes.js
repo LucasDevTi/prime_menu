@@ -105,7 +105,7 @@ async function atualizarStatusMesa(mesa_id, status) {
             const errorData = await response.json();
             throw new Error(`ERRO: ${errorData.message}`);
         }
-        console.log(response.json);
+        // console.log(response.json);
 
         const data = await response.json();
 
@@ -124,9 +124,11 @@ async function atualizarStatusMesa(mesa_id, status) {
 }
 
 function disableOptionTable(table) {
-    table.removeAttribute('onClick');
-    table.className = '';
-    table.classList.add('info-box', 'bg-gradient-secondary', 'btn-opcoes-mesa');
+    if (table) {
+        table.removeAttribute('onClick');
+        table.className = '';
+        table.classList.add('info-box', 'bg-gradient-secondary', 'btn-opcoes-mesa');
+    }
 }
 
 function enableOptionTable(table, table_id, status) {
@@ -136,12 +138,22 @@ function enableOptionTable(table, table_id, status) {
     } else if (status === "1") {
         table.className = '';
         table.classList.add('info-box', 'bg-gradient-info', 'mesa');
+    } else if (status === "2") {
+        table.className = '';
+        table.classList.add('info-box', 'bg-gradient-danger', 'mesa');
     } else if (status === "4") {
         table.className = '';
         table.classList.add('info-box', 'bg-gradient-warning', 'mesa');
     }
     table.setAttribute('onClick', `showModalOptionsTable('${table_id}','${status}')`);
 
+}
+
+function setupOption(table) {
+    if (table) {
+        table.className = '';
+        table.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
+    }
 }
 
 function showModalOptionsTable(mesa_id, status) {
@@ -154,30 +166,35 @@ function showModalOptionsTable(mesa_id, status) {
     const mesaInativar = document.querySelector('#div-inativar-mesa');
 
     // Define padrão as classes
-    mesaOcupar.className = '';
-    mesaOcupar.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
+    setupOption(mesaOcupar);
+    setupOption(mesaVincular);
+    setupOption(mesaFechar);
+    setupOption(mesaTrocar);
+    setupOption(mesaPagar);
+    setupOption(mesaInativar);
 
-    mesaVincular.className = '';
-    mesaVincular.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
+    if (mesaVincular) {
+        mesaVincular.setAttribute('onClick', `linkTables('${mesa_id}','0','true')`);
+    }
 
-    mesaFechar.className = '';
-    mesaFechar.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
+    if (mesaInativar) {
+        document.querySelector('#text-ativacao').innerHTML = "Inativar";
+        mesaInativar.setAttribute('onClick', `changeStatusTable('${mesa_id}','4')`);
+    }
 
-    mesaTrocar.className = '';
-    mesaTrocar.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
+    if (mesaFechar) {
+        mesaFechar.setAttribute('onClick', `changeStatusTable('${mesa_id}','2')`);
+    }
 
-    mesaPagar.className = '';
-    mesaPagar.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
-
-    mesaInativar.className = '';
-    mesaInativar.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
-    document.querySelector('#text-ativacao').innerHTML = "Inativar";
-
-    mesaInativar.setAttribute('onClick', `changeStatusTable('${mesa_id}','4')`);
+    if (mesaVincular) {
+        mesaVincular.setAttribute('onClick', `getMesas ('${mesa_id}','2')`);
+    }
 
     if (status === "0" || status === "3") {
 
-        mesaOcupar.setAttribute('onClick', `changeStatusTable('${mesa_id}','1')`);
+        if (mesaOcupar) {
+            mesaOcupar.setAttribute('onClick', `changeStatusTable('${mesa_id}','1')`);
+        }
 
         disableOptionTable(mesaVincular);
         disableOptionTable(mesaFechar);
@@ -189,14 +206,17 @@ function showModalOptionsTable(mesa_id, status) {
         disableOptionTable(mesaPagar);
         disableOptionTable(mesaInativar);
     } else if (status === "2") {
+
         disableOptionTable(mesaOcupar);
         disableOptionTable(mesaFechar);
         disableOptionTable(mesaVincular);
         disableOptionTable(mesaTrocar);
         disableOptionTable(mesaInativar);
     } else if (status === "4") {
-        document.querySelector('#text-ativacao').innerHTML = "Ativar";
-        mesaInativar.setAttribute('onClick', `changeStatusTable('${mesa_id}','0')`);
+        if (mesaInativar) {
+            document.querySelector('#text-ativacao').innerHTML = "Ativar";
+            mesaInativar.setAttribute('onClick', `changeStatusTable('${mesa_id}','0')`);
+        }
 
         disableOptionTable(mesaOcupar);
         disableOptionTable(mesaVincular);
@@ -217,3 +237,69 @@ function changeStatusTable(mesa_id, status) {
     atualizarStatusMesa(mesa_id, status);
 }
 
+function linkTables(table_id, table_id_link, showTables = true) {
+
+    const tablesSelect = document.querySelector('#vincular-mesas-disponiveis');
+
+    if (showTables) {
+        tablesSelect.style.display = 'block';
+    }
+}
+
+
+let selecionandoMesas = false;
+let mesasSelecionadas = [];
+
+function ativarModoSelecao() {
+    selecionandoMesas = true;
+    mesasSelecionadas = []; // Limpa as mesas selecionadas
+    document.getElementById('juntarMesasBtn').innerText = "Cancelar Seleção";
+    document.getElementById('btn-juntar-mesas').style.display = 'block';
+    document.getElementById('btn-reserva').style.display = 'none';
+
+    // Troca o texto do botão para "Cancelar Seleção" e alterna ao clicar novamente
+    document.getElementById('juntarMesasBtn').onclick = desativarModoSelecao;
+}
+
+function desativarModoSelecao() {
+    selecionandoMesas = false;
+    mesasSelecionadas = []; // Limpa a seleção
+    document.getElementById('juntarMesasBtn').innerText = "Juntar Mesas";
+    document.getElementById('juntarMesasBtn').onclick = ativarModoSelecao;
+
+    document.getElementById('btn-juntar-mesas').style.display = 'none';
+    document.getElementById('btn-reserva').style.display = 'block';
+
+    // Remove a classe de seleção de todas as mesas
+    const mesas = document.querySelectorAll('.mesa-selecionada');
+    mesas.forEach(mesa => {
+        mesa.classList.remove('mesa-selecionada');
+    });
+}
+
+function acaoMesa(mesaElemento) {
+    const status = mesaElemento.dataset.status;
+
+    if (selecionandoMesas && (status == '0' || status == '1')) {
+        selecionarMesa(mesaElemento);
+    } else {
+        const mesaId = mesaElemento.dataset.idMesa;
+        showModalOptionsTable(mesaId, status);
+    }
+}
+
+function selecionarMesa(mesaElemento) {
+    const mesaId = mesaElemento.dataset.idMesa;
+
+    if (mesasSelecionadas.includes(mesaId)) {
+        // Se a mesa já está selecionada, removê-la da seleção
+        mesasSelecionadas = mesasSelecionadas.filter(id => id !== mesaId);
+        mesaElemento.classList.remove("mesa-selecionada");
+    } else {
+        // Adiciona a mesa à lista de selecionadas
+        mesasSelecionadas.push(mesaId);
+        mesaElemento.classList.add("mesa-selecionada");
+    }
+
+    console.log("Mesas Selecionadas:", mesasSelecionadas);
+}

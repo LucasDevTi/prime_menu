@@ -1,4 +1,5 @@
 <x-layout>
+
   <script src="{{asset('src/js/telefone.js')}}"></script>
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -40,14 +41,18 @@
 
                   <div class="content_legenda">
                     <x-legenda legenda="Liberada:" bgLegenda="success" />
-                    <x-legenda legenda="Ocupada:" bgLegenda="info" />
+                    <x-legenda legenda="Aberta:" bgLegenda="info" />
                     <x-legenda legenda="Fechada:" bgLegenda="danger" />
                     <x-legenda legenda="Reservada:" bgLegenda="secondary" />
                     <x-legenda legenda="Inativa:" bgLegenda="warning" />
                   </div>
                 </div>
-                <div class="d-flex justify-content-end">
-                  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#reserva-modal">
+                <div class="d-flex justify-content-end" style="padding-right: 30px;">
+                  <button class="btn btn-warning mr-2" id="juntarMesasBtn" onclick="ativarModoSelecao()">Juntar Mesas</button>
+                  <button id="btn-juntar-mesas" style="display: none;" type="button" class="btn btn-success" data-toggle="modal" data-target="#mesa-principal-modal">
+                    Juntar
+                  </button>
+                  <button id="btn-reserva" type="button" class="btn btn-primary" data-toggle="modal" data-target="#reserva-modal">
                     Reservar
                   </button>
                 </div>
@@ -78,7 +83,6 @@
       <!-- /.container-fluid -->
 
       <x-small_modal id="reserva-modal" titleModal="Reserva" textBtn="Continuar">
-
         <div class="modal-body">
           <form id="telefoneForm" method="POST" action="{{route('find-client-cel')}}">
             @csrf
@@ -90,7 +94,20 @@
             </div>
           </form>
         </div>
+      </x-small_modal>
 
+      <x-small_modal id="mesa-principal-modal" titleModal="MesaPrincipal" textBtn="Continuar">
+        <div class="modal-body">
+          <form id="mesaPrincipalForm" method="POST" action="{{route('link-tables')}}">
+            @csrf
+            <div class="card-body">
+              <div class="form-group">
+                <label for="mesa_principal">Mesa principal</label>
+                <input type="number" class="form-control" id="mesa_principal" name="mesa_principal" placeholder="Digite o número da mesa principal">
+              </div>
+            </div>
+          </form>
+        </div>
       </x-small_modal>
 
       <x-medium_modal />
