@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Table;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TableController extends Controller
 {
@@ -66,7 +67,59 @@ class TableController extends Controller
         }
     }
 
-    public function linkTables(){
-        
+    public function linkTables(Request $request)
+    {
+
+        $validated = $request->validate([
+            'mesasSelecionadas' => 'required|array',
+            'mesasSelecionadas.*' => 'exists:tables,id',  // Verifica se as mesas existem na tabela
+            'mesaPrincipal' => 'required|exists:tables,id',  // Verifica se a mesa principal existe
+        ]);
+
+        DB::beginTransaction();
+
+        $success = true;
+        $mesaStatus = null;
+
+        try {
+            $mesasSelecionadas = $request->mesasSelecionadas;
+            $mesaPrincipal = $request->mesaPrincipal;
+
+            $mesas = Table::whereIn('id', $mesasSelecionadas)
+                ->where('id', '!=', $mesaPrincipal)
+                ->get();
+
+            foreach ($request->mesasSelecionadas as $table_id) {
+                if ($table_id != $request->mesaPrincipal) {
+                    $table = Table::find($table_id);
+                    $table->linked_table_id = $request->mesaPrincipal;
+                    $table->status = 1;
+                    $table->description_status = 'Aberta';
+                    if (!$table->save()) {
+                        $success = false;
+                        break;
+                    }
+                    $table->save();
+                }
+            }
+
+            if ($success) {
+                DB::commit();
+                return response()->json([
+                    'message' => 'Status atualizado com sucesso!',
+                    'success' => true,
+                    'status' => $mesaPrincipal
+                ], 200);
+            } else {
+                DB::rollBack();
+                return response()->json([
+                    'message' => 'Ocorreu um erro ao atualizar as mesas.',
+                    'success' => false
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Erro interno ao tentar vincular as mesas.'], 500);
+        }
     }
 }

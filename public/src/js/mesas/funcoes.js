@@ -303,7 +303,7 @@ function selecionarMesa(mesaElemento) {
     console.log("Mesas Selecionadas:", mesasSelecionadas);
 }
 
-function juntarMesas() {
+async function juntarMesas() {
 
     if (mesasSelecionadas.length === 0) {
         $('.alert-success-small-modal').hide();
@@ -315,10 +315,45 @@ function juntarMesas() {
     const mesaPrincipal = $('#mesa_principal').val();
 
     if (mesasSelecionadas.includes(mesaPrincipal)) {
-        $('.alert-success-small-modal').show();
-        $('.alert-error-small-modal').hide();
-        $('.alert-success-small-modal').html("Parabens");
-        return
+
+        resetModal();
+
+        const overlay = document.querySelector('.overlay');
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        try {
+            overlay.classList.remove('d-none');
+            const response = await fetch('/link-tables', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token, // Inclua o token CSRF para segurança
+                },
+                body: JSON.stringify({ mesasSelecionadas: mesasSelecionadas, mesaPrincipal: mesaPrincipal })
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`ERRO: ${errorData.message}`);
+            }
+    
+            const data = await response.json();
+    
+            if (data.success) {
+                
+                location.reload();
+
+                // $('#opcoes_mesa').modal('hide');
+    
+                // enableOptionTable(mesa, mesa_id, data.status)
+            }
+    
+            // Aqui você pode fazer algo após a atualização, como recarregar a lista de mesas
+    
+        } catch (error) {
+            console.error('Erro ao atualizar o status da mesa:', error);
+        }
+
     } else {
         $('.alert-success-small-modal').hide();
         $('.alert-error-small-modal').show();
