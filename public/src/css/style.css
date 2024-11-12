@@ -86,13 +86,20 @@
 }
 
 .mesa-selecionada {
-    border: 3px solid #FF4500;  /* Cor de borda mais forte (laranja escuro) */
-    background-color: rgba(255, 69, 0, 0.3); /* Fundo semi-transparente */
-    box-shadow: 0px 0px 10px 3px rgba(255, 69, 0, 0.6); /* Sombra intensa */
-    transform: scale(1.05);  /* Aumenta um pouco o tamanho da mesa para dar destaque */
-    
+    border: 3px solid #FF4500;
+    /* Cor de borda mais forte (laranja escuro) */
+    background-color: rgba(255, 69, 0, 0.3);
+    /* Fundo semi-transparente */
+    box-shadow: 0px 0px 10px 3px rgba(255, 69, 0, 0.6);
+    /* Sombra intensa */
+    transform: scale(1.05);
+    /* Aumenta um pouco o tamanho da mesa para dar destaque */
+
 }
 
+.alert-error-small-modal, .alert-success-small-modal{
+    display: none;
+}
 @media(max-width:690px) {
     .div-tables {
         width: 100px;
@@ -113,6 +120,5 @@
         width: 5px;
         font-size: 25px;
     }
-    
-}
 
+}

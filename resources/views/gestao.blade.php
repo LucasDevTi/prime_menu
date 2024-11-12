@@ -54,7 +54,7 @@
                     Juntar
                   </button>
                   @endif
-                  <button id="btn-reserva" type="button" class="btn btn-primary" data-toggle="modal" data-target="#reserva-modal">
+                  <button id="btn-reserva" type="button" class="btn btn-primary" onclick="resetModal()" data-toggle="modal" data-target="#reserva-modal">
                     Reservar
                   </button>
                 </div>

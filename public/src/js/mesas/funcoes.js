@@ -1,4 +1,3 @@
-
 async function buscaCliente() {
     const form = document.getElementById('telefoneForm');
     const formData = new FormData(form);
@@ -302,4 +301,34 @@ function selecionarMesa(mesaElemento) {
     }
 
     console.log("Mesas Selecionadas:", mesasSelecionadas);
+}
+
+function juntarMesas() {
+
+    if (mesasSelecionadas.length === 0) {
+        $('.alert-success-small-modal').hide();
+        $('.alert-error-small-modal').show();
+        $('.alert-error-small-modal').html("Precisa de uma mesa principal");
+        return
+    }
+
+    const mesaPrincipal = $('#mesa_principal').val();
+
+    if (mesasSelecionadas.includes(mesaPrincipal)) {
+        $('.alert-success-small-modal').show();
+        $('.alert-error-small-modal').hide();
+        $('.alert-success-small-modal').html("Parabens");
+        return
+    } else {
+        $('.alert-success-small-modal').hide();
+        $('.alert-error-small-modal').show();
+        $('.alert-error-small-modal').html("A mesa principal precisa ser uma  das mesas selecionadas.");
+        return
+    }
+    // console.log("Mesas para juntar:", mesasSelecionadas);
+}
+
+function resetModal() {
+    $('.alert-success-small-modal').hide();
+    $('.alert-error-small-modal').hide();
 }

@@ -7,16 +7,30 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+
+            <!-- Alerta de sucesso -->
+            <div class="alert alert-success alert-success-small-modal">
+               
+            </div>
+
+            <!-- Alerta de erro -->
+            <div class="alert alert-danger alert-error-small-modal">
+                
+            </div>
+
             <div class="overlay-wrapper">
                 <div class="overlay d-none">
                     <i class="fas fa-2x fa-sync-alt fa-spin"></i>
                 </div>
                 {{ $slot }}
             </div>
+
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
                 @if ($titleModal === 'Reserva')
                 <button type="button" class="btn btn-primary" onclick="buscaCliente()">{{ $textBtn }}</button>
+                @elseif ($titleModal === 'MesaPrincipal')
+                <button type="button" class="btn btn-primary" onclick="juntarMesas()">{{ $textBtn }}</button>
                 @else
                 <button type="button" class="btn btn-primary">{{ $textBtn }}</button>
                 @endif
