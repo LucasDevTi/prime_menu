@@ -32,7 +32,9 @@
                             @endif
 
                             <div class="card-header border-0">
-
+                                <div class="search-container">
+                                    <input type="text" id="search-input" class="form-control" placeholder="Pesquisar produtos...">
+                                </div>
                                 <div class="d-flex justify-content-end" style="padding-right: 30px;">
                                     @if (auth()->user()->user_type == 1)
                                     <button id="btn-reserva" type="button" class="btn btn-primary" data-toggle="modal" data-target="#cad-produtos-modal">

@@ -52,10 +52,10 @@ class ProductsController extends Controller
                 $data = [
                     'products' => $products
                 ];
-                return view('produtos', $data);
+                return redirect()->route('produtos')->with('success', 'produto criado com sucesso!');
             }
         } catch (\Exception $e) {
             DB::rollBack();
-        }
+        } 
     }
 }
