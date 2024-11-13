@@ -48,15 +48,15 @@
                   </div>
                 </div>
                 <div class="d-flex justify-content-end" style="padding-right: 30px;">
-                  @if (auth()->user()->user_type != 2)
+                  @if (auth()->user()->user_type == 1 || auth()->user()->user_type == 4)
                   <button class="btn btn-warning mr-2" id="juntarMesasBtn" onclick="ativarModoSelecao()">Juntar Mesas</button>
                   <button id="btn-juntar-mesas" style="display: none;" type="button" class="btn btn-success" data-toggle="modal" data-target="#mesa-principal-modal">
                     Juntar
                   </button>
-                  @endif
                   <button id="btn-reserva" type="button" class="btn btn-primary" onclick="resetModal()" data-toggle="modal" data-target="#reserva-modal">
                     Reservar
                   </button>
+                  @endif
                 </div>
               </div>
               <div class="card-body">
