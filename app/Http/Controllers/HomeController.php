@@ -9,7 +9,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $tables = Table::paginate(60);
+        $tables = Table::paginate(500);
         $data = [
             'mesas' => $tables
         ];
