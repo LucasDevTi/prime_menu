@@ -20,3 +20,55 @@ document.getElementById('search-input').addEventListener('input', function (even
         }
     });
 });
+
+function showModalProdEdit(name, ingredients, price, id) {
+    const inputProdName = document.getElementById('product_name');
+    const inputProdIngredients = document.getElementById('ingredientes');
+    const inputProdPrice = document.getElementById('product_price');
+    const inputIdProduto = document.getElementById('id_produto');
+
+    inputProdName.value = name;
+    inputProdIngredients.value = ingredients;
+    inputProdPrice.value = price;
+
+    document.getElementById('productsForm').action = '/editProduct';
+    inputIdProduto.value = id;
+
+    $('#cad-produtos-modal').modal('show');
+}
+
+async function excluirProduto(event, id) {
+    event.stopPropagation();
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    if (confirm('Deseja excluir esse produto?')) {
+        try {
+            const response = await fetch('/deletar-produto', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token, // Inclua o token CSRF para segurança
+                },
+                body: JSON.stringify({ id: id }) // Exemplo de novo status
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`ERRO: ${errorData.message}`);
+            }
+            // console.log(response.json);
+
+            const data = await response.json();
+
+            if (data.success) {
+
+                location.reload();
+            }
+
+            // Aqui você pode fazer algo após a atualização, como recarregar a lista de mesas
+
+        } catch (error) {
+            console.error('Erro ao atualizar o status da mesa:', error);
+        }
+    }
+}

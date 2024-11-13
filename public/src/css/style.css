@@ -111,7 +111,7 @@
         width: 20px;
     }
 
-    .div-products{
+    .div-products {
         background-color: red;
     }
 }
@@ -141,21 +141,43 @@
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     padding-left: 8px;
     display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
+    /* flex-direction: column; */
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 15px;
+    /* align-items: center; */
 }
 
-.div-products h2{
+.div-item-prod {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    /* flex: 8; */
+}
+
+.div-trash-product {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #EF4342;
+    /* flex: 1; */
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.div-products h2 {
     font-size: 1.7rem !important;
     margin-bottom: 0px;
 }
 
-.ingredients{
+.ingredients {
     color: #939393;
     display: block;
     margin-top: -8px;
 }
+
 .div-products:hover {
     box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.15), 1px 1px 3px rgba(0, 0, 0, 0.1);
     transform: scale(1.01);
@@ -163,12 +185,14 @@
     /* Zoom leve */
 }
 
-.price-product{
+.price-product {
     color: #EF4342;
     font-weight: bolder;
     font-size: 1.1rem;
+    margin-top: 25px;
+
 }
 
-#search-input{
+#search-input {
     margin-bottom: 10px;
 }

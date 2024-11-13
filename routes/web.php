@@ -24,5 +24,7 @@ Route::post('/setreserva', [ReservationController::class, 'setReserva'])->name('
 Route::post('/atualizar-status-mesa', [TableController::class, 'atualizarStatusMesa'])->name('atualizar-status-mesa');
 Route::post('/link-tables', [TableController::class, 'linkTables'])->name('link-tables');
 Route::post('/setProduct', [ProductsController::class, 'setProduct'])->name('setProduct');
+Route::post('/editProduct', [ProductsController::class, 'editProduct'])->name('editProduct');
+Route::post('/deletar-produto', [ProductsController::class, 'deleteProduct'])->name('deletar-produto');
 
 

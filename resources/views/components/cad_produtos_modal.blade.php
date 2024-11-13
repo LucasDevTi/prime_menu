@@ -11,6 +11,7 @@
                 @csrf
                 <div class="modal-body">
                     <div class="card-body">
+                        <input type="hidden" name="id_produto" id="id_produto" value="">
                         <div class="row">
                             <div class="col-8">
                                 <label for="product_name">Nome</label>
@@ -33,7 +34,7 @@
                 </div>
                 <div class="modal-footer justify-content-between">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
-                    <button type="submit" class="btn btn-primary">Cadastrar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
                 </div>
             </form>
         </div>
