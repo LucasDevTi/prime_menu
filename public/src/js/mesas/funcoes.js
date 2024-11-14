@@ -520,10 +520,10 @@ function rmvProduct(id_produto, valor) {
     }
 }
 
-document.getElementById('opcoesFormProd').addEventListener('submit', function(event) {
+document.getElementById('opcoesFormProd').addEventListener('submit', function (event) {
     // Impede o envio do formulário caso queira preencher o campo hidden antes
     event.preventDefault();
-
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     // Converte o array de produtos para JSON
     const produtosJson = JSON.stringify(produtos);
 

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TableController;
@@ -28,5 +29,5 @@ Route::post('/editProduct', [ProductsController::class, 'editProduct'])->name('e
 Route::post('/deletar-produto', [ProductsController::class, 'deleteProduct'])->name('deletar-produto');
 Route::post('/get-produtos', [ProductsController::class, 'getAllProducts'])->name('get-produtos');
 
-Route::post('/set-order', [ProductsController::class, 'setOrder'])->name('set-order');
+Route::post('/set-order', [OrderController::class, 'setOrder'])->name('set-order');
 
