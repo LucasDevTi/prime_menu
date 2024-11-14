@@ -129,4 +129,27 @@ class ProductsController extends Controller
             }
         }
     }
+
+    public function getAllProducts(Request $request)
+    {
+        if (!Auth::check()) {
+            return redirect('/')->with('error', 'Você precisa estar logado para acessar essa página.');
+        }
+
+        $products = Product::all();
+
+        if ($products) {
+            return response()->json([
+                'message' => '',
+                'success' => true,
+                'data' => $products
+            ], 200);
+        }
+        
+        return response()->json([
+            'message' => 'Nemhum produto encontrado!',
+            'success' => false,
+            'data' => ''
+        ], 400);
+    }
 }

@@ -26,5 +26,7 @@ Route::post('/link-tables', [TableController::class, 'linkTables'])->name('link-
 Route::post('/setProduct', [ProductsController::class, 'setProduct'])->name('setProduct');
 Route::post('/editProduct', [ProductsController::class, 'editProduct'])->name('editProduct');
 Route::post('/deletar-produto', [ProductsController::class, 'deleteProduct'])->name('deletar-produto');
+Route::post('/get-produtos', [ProductsController::class, 'getAllProducts'])->name('get-produtos');
 
+Route::post('/set-order', [ProductsController::class, 'setOrder'])->name('set-order');
 

@@ -1,3 +1,12 @@
+let selecionandoMesas = false;
+let mesasSelecionadas = [];
+
+// Array para armazenar os produtos
+let produtos = [];
+
+// Variável para o valor total
+let valorTotal = 0;
+
 async function buscaCliente() {
     const form = document.getElementById('telefoneForm');
     const formData = new FormData(form);
@@ -90,6 +99,68 @@ async function atualizarStatusMesa(mesa_id, status) {
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const mesa = document.querySelector(`div[data-id-mesa="${mesa_id}"]`);
 
+    if (status == "1") {
+        $('#opcoes_mesa').modal('hide');
+        $('#opcoes_produtos_modal').modal('show');
+
+        try {
+            const response = await fetch('/get-produtos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token, // Inclua o token CSRF para segurança
+                },
+                body: JSON.stringify({}) // Exemplo de novo status
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`ERRO: ${errorData.message}`);
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+
+                const productContainer = document.getElementById('products-list');
+                productContainer.innerHTML = '';
+
+                data.data.forEach(product => {
+                    const productElement = `
+                    <div class="content-products col-sm-12">
+                        <div class="div-products col-sm-8" id="products-list">
+                            <div class="div-item-prod" style="flex:1;">
+                                <div class="desc-product">
+                                    <h2>${product.name}</h2>
+                                    <span class="ingredients">${product.ingredients}</span>
+                                    <input type="text" class="form-control" style="width:100%;"  placeholder="Observações" />
+                                </div>
+                                <div class="price-product" style="margin-top:0px;">
+                                    R$ ${product.price}
+                                </div>
+                            </div>
+                            <div class="qtde-item text-success">
+                                <input type="number" id="qtde_${product.id}" value="0" class="text-success" disabled />
+                            </div>
+                        </div>
+                        <div class="content-qtde">
+                            <i class="fa fa-plus-circle plus-qtde" aria-hidden="true" onclick="addProduct(${product.id}, ${product.price})"></i>
+                            <i class="fa fa-minus-circle minus-qtde" aria-hidden="true" onclick="rmvProduct(${product.id}, ${product.price})"></i>    
+                        </div>
+                    </div>
+                `;
+                    productContainer.insertAdjacentHTML('beforeend', productElement);
+                });
+            }
+
+            // Aqui você pode fazer algo após a atualização, como recarregar a lista de mesas
+
+        } catch (error) {
+            console.error('Erro ao atualizar o status da mesa:', error);
+        }
+
+    }
+    return
     try {
         const response = await fetch('/atualizar-status-mesa', {
             method: 'POST',
@@ -245,10 +316,6 @@ function linkTables(table_id, table_id_link, showTables = true) {
     }
 }
 
-
-let selecionandoMesas = false;
-let mesasSelecionadas = [];
-
 function ativarModoSelecao() {
     selecionandoMesas = true;
     mesasSelecionadas = []; // Limpa as mesas selecionadas
@@ -331,25 +398,25 @@ async function juntarMesas() {
                 },
                 body: JSON.stringify({ mesasSelecionadas: mesasSelecionadas, mesaPrincipal: mesaPrincipal })
             });
-    
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(`ERRO: ${errorData.message}`);
             }
-    
+
             const data = await response.json();
-    
+
             if (data.success) {
-                
+
                 location.reload();
 
                 // $('#opcoes_mesa').modal('hide');
-    
+
                 // enableOptionTable(mesa, mesa_id, data.status)
             }
-    
+
             // Aqui você pode fazer algo após a atualização, como recarregar a lista de mesas
-    
+
         } catch (error) {
             console.error('Erro ao atualizar o status da mesa:', error);
         }
@@ -367,3 +434,102 @@ function resetModal() {
     $('.alert-success-small-modal').hide();
     $('.alert-error-small-modal').hide();
 }
+
+document.getElementById('search-input').addEventListener('input', function (event) {
+    let searchTerm = event.target.value.toLowerCase(); // Obtém o termo de pesquisa em minúsculas
+    let products = document.querySelectorAll('.content-products'); // Seleciona todos os produtos
+
+    products.forEach(function (product) {
+        let productName = product.querySelector('.desc-product h2').textContent.toLowerCase(); // Nome do produto
+        // Verifica se o nome do produto inclui o termo de pesquisa
+        if (productName.includes(searchTerm)) {
+            product.style.display = ''; // Exibe o produto
+        } else {
+            product.style.display = 'none'; // Oculta o produto
+        }
+    });
+});
+
+function showModalProdEdit(name, ingredients, price, id) {
+    const inputProdName = document.getElementById('product_name');
+    const inputProdIngredients = document.getElementById('ingredientes');
+    const inputProdPrice = document.getElementById('product_price');
+    const inputIdProduto = document.getElementById('id_produto');
+
+    inputProdName.value = name;
+    inputProdIngredients.value = ingredients;
+    inputProdPrice.value = price;
+
+    document.getElementById('productsForm').action = '/editProduct';
+    inputIdProduto.value = id;
+
+    $('#cad-produtos-modal').modal('show');
+}
+
+
+function addProduct(id_produto, valor) {
+    // Verifica se o produto já existe no array
+    let produto = produtos.find(p => p.id === id_produto);
+
+    if (produto) {
+        // Se o produto já existe, aumenta a quantidade e recalcula o valor total
+        produto.quantidade += 1;
+    } else {
+        // Se o produto não existir, cria um novo objeto e adiciona ao array
+        produto = { id: id_produto, valor: valor, quantidade: 1 };
+        produtos.push(produto);
+    }
+
+    // Recalcular o valor total
+    valorTotal += valor;
+
+    // Atualiza o valor no input
+    const inputProduct = document.getElementById(`qtde_${id_produto}`);
+    inputProduct.value = produto.quantidade;
+
+    // Atualiza o valor total na tela
+    const spanValorTotal = document.getElementById('valor-total');
+    spanValorTotal.textContent = `R$ ${valorTotal.toFixed(2)}`;
+
+    console.log(produtos);
+}
+
+function rmvProduct(id_produto, valor) {
+    // Encontra o produto no array
+    let produto = produtos.find(p => p.id === id_produto);
+
+    if (produto && produto.quantidade > 0) {
+        // Se o produto existir e a quantidade for maior que 0, diminui a quantidade
+        produto.quantidade -= 1;
+
+        // Recalcular o valor total
+        valorTotal -= valor;
+
+        // Atualiza o valor no input
+        const inputProduct = document.getElementById(`qtde_${id_produto}`);
+        inputProduct.value = produto.quantidade;
+
+        // Atualiza o valor total na tela
+        const spanValorTotal = document.getElementById('valor-total');
+        spanValorTotal.textContent = `R$ ${valorTotal.toFixed(2)}`;
+
+        // Se a quantidade chegar a 0, remove o produto do array
+        if (produto.quantidade === 0) {
+            produtos = produtos.filter(p => p.id !== id_produto);
+        }
+    }
+}
+
+document.getElementById('opcoesFormProd').addEventListener('submit', function(event) {
+    // Impede o envio do formulário caso queira preencher o campo hidden antes
+    event.preventDefault();
+
+    // Converte o array de produtos para JSON
+    const produtosJson = JSON.stringify(produtos);
+
+    // Preenche o campo hidden com o JSON dos produtos
+    document.getElementById('productsData').value = produtosJson;
+
+    // Agora o formulário pode ser enviado normalmente
+    this.submit(); // Isso submete o formulário após preencher o campo hidden
+});

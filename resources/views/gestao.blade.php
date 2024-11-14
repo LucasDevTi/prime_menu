@@ -115,6 +115,8 @@
       <x-medium_modal />
 
       <x-opcoes_mesas />
+
+      <x-opcoes_produtos_modal />
     </div>
     <!-- /.content -->
   </div>
