@@ -21,7 +21,7 @@
         <!-- SidebarSearch Form -->
         <div class="form-inline">
             <div class="input-group" data-widget="sidebar-search">
-                <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+                <input class="form-control form-control-sidebar" type="search" placeholder="Pesquisar" aria-label="Search">
                 <div class="input-group-append">
                     <button class="btn btn-sidebar">
                         <i class="fas fa-search fa-fw"></i>
@@ -44,7 +44,7 @@
                         </p>
                     </a>
                 </li>
-
+                @if (auth()->user()->user_type == 1)
                 <li class="nav-item">
                     <a href="/produtos" class="nav-link {{ Request::is('produtos*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-columns"></i>
@@ -53,6 +53,7 @@
                         </p>
                     </a>
                 </li>
+                @endif
             </ul>
         </nav>
         <!-- /.sidebar-menu -->
