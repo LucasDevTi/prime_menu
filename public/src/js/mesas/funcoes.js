@@ -3,7 +3,7 @@ let mesasSelecionadas = [];
 
 // Array para armazenar os produtos
 let produtos = [];
-
+let mesaAtualMenu = [];
 // Variável para o valor total
 let valorTotal = 0;
 
@@ -100,6 +100,7 @@ async function atualizarStatusMesa(mesa_id, status) {
     const mesa = document.querySelector(`div[data-id-mesa="${mesa_id}"]`);
 
     if (status == "1") {
+
         $('#opcoes_mesa').modal('hide');
         $('#opcoes_produtos_modal').modal('show');
 
@@ -144,8 +145,8 @@ async function atualizarStatusMesa(mesa_id, status) {
                             </div>
                         </div>
                         <div class="content-qtde">
-                            <i class="fa fa-plus-circle plus-qtde" aria-hidden="true" onclick="addProduct(${product.id}, ${product.price})"></i>
-                            <i class="fa fa-minus-circle minus-qtde" aria-hidden="true" onclick="rmvProduct(${product.id}, ${product.price})"></i>    
+                            <i class="fa fa-plus-circle plus-qtde" aria-hidden="true" onclick="addProduct(${product.id}, ${product.price}, ${mesa_id})"></i>
+                            <i class="fa fa-minus-circle minus-qtde" aria-hidden="true" onclick="rmvProduct(${product.id}, ${product.price}, ${mesa_id})"></i>    
                         </div>
                     </div>
                 `;
@@ -156,11 +157,11 @@ async function atualizarStatusMesa(mesa_id, status) {
             // Aqui você pode fazer algo após a atualização, como recarregar a lista de mesas
 
         } catch (error) {
-            console.error('Erro ao atualizar o status da mesa:', error);
+            console.error('Erro ao buscar produtos:', error);
         }
 
     }
-    return
+    
     try {
         const response = await fetch('/atualizar-status-mesa', {
             method: 'POST',
@@ -467,7 +468,7 @@ function showModalProdEdit(name, ingredients, price, id) {
 }
 
 
-function addProduct(id_produto, valor) {
+function addProduct(id_produto, valor, mesa_id) {
     // Verifica se o produto já existe no array
     let produto = produtos.find(p => p.id === id_produto);
 
@@ -478,6 +479,7 @@ function addProduct(id_produto, valor) {
         // Se o produto não existir, cria um novo objeto e adiciona ao array
         produto = { id: id_produto, valor: valor, quantidade: 1 };
         produtos.push(produto);
+        mesaAtualMenu = mesa_id;
     }
 
     // Recalcular o valor total
@@ -494,7 +496,7 @@ function addProduct(id_produto, valor) {
     console.log(produtos);
 }
 
-function rmvProduct(id_produto, valor) {
+function rmvProduct(id_produto, valor, mesa_id) {
     // Encontra o produto no array
     let produto = produtos.find(p => p.id === id_produto);
 
@@ -517,19 +519,49 @@ function rmvProduct(id_produto, valor) {
         if (produto.quantidade === 0) {
             produtos = produtos.filter(p => p.id !== id_produto);
         }
+
+        mesaAtualMenu = mesa_id;
+
     }
 }
 
-document.getElementById('opcoesFormProd').addEventListener('submit', function (event) {
+async function setPedido(event) {
     // Impede o envio do formulário caso queira preencher o campo hidden antes
     event.preventDefault();
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     // Converte o array de produtos para JSON
     const produtosJson = JSON.stringify(produtos);
 
+    try {
+        const response = await fetch('/set-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token, // Inclua o token CSRF para segurança
+            },
+            body: JSON.stringify({productsData: produtosJson, mesa_id: mesaAtualMenu}) // Exemplo de novo status
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`ERRO: ${errorData.message}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            location.reload();
+        }
+
+        // Aqui você pode fazer algo após a atualização, como recarregar a lista de mesas
+
+    } catch (error) {
+        console.error('Erro ao atualizar o status da mesa:', error);
+    }
     // Preenche o campo hidden com o JSON dos produtos
     document.getElementById('productsData').value = produtosJson;
 
     // Agora o formulário pode ser enviado normalmente
     this.submit(); // Isso submete o formulário após preencher o campo hidden
-});
+};

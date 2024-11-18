@@ -34,7 +34,7 @@
                 </div>
                 <div class="modal-footer justify-content-between">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
-                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button id="btn-salvar-produto" type="submit" onclick="saveProduct(event)" class="btn btn-primary">Salvar</button>
                 </div>
             </form>
         </div>

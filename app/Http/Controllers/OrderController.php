@@ -23,6 +23,7 @@ class OrderController extends Controller
         ]);
 
         $produtos = json_decode($request->input('productsData'), true);
+        // $produtos = $request->productsData;
 
         if (!empty($produtos)) {
 
@@ -32,13 +33,14 @@ class OrderController extends Controller
             $valorTotal = 0;
 
             $order = new Order();
-            $orderItem = new OrderItems();
 
             try {
                 $order->table_id = $request->mesa_id;
 
                 if ($order->save()) {
+
                     $orderId = $order->id;
+
                     foreach ($produtos as $produto) {
 
                         $item = Product::find($produto['id']);
@@ -46,14 +48,18 @@ class OrderController extends Controller
                         if ($item) {
 
                             $price = $item['price'] * $produto['quantidade'];
+                            $orderItem = new OrderItems();
 
                             $orderItem->order_id = $orderId;
                             $orderItem->product_id = $produto['id'];
+
                             $orderItem->quantity = $produto['quantidade'];
                             $orderItem->price = $price;
                             $orderItem->sub_total = $price;
+                            $orderItem->transferred_table_id = $request->mesa_id;
 
                             if (!$orderItem->save()) {
+
                                 $success = false;
                                 break;
                             }
@@ -87,6 +93,7 @@ class OrderController extends Controller
                 }
             } catch (\Exception $e) {
                 DB::rollBack();
+                // print_r($e->getMessage());
                 return response()->json(['error' => 'Erro interno ao tentar vincular as mesas.'], 500);
             }
         }

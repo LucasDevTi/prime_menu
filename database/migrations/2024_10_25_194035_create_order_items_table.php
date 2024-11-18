@@ -18,7 +18,8 @@ return new class extends Migration
             $table->integer('quantity')->nullable();
             $table->float('price', 10, 2)->nullable();
             $table->float('sub_total')->nullable();
-            $table->foreignId('transferred_table_id')->constrained('tables')->onDelete('cascade')->default(0);
+             $table->foreignId('transferred_table_id')->nullable()->constrained('tables')->default(0)->onDelete('cascade');
+
             $table->timestamps();
         });
     }

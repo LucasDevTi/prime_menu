@@ -72,3 +72,17 @@ async function excluirProduto(event, id) {
         }
     }
 }
+
+function saveProduct(event) {
+
+    event.preventDefault();
+
+    const name = document.getElementById('product_name').value;
+    const price = document.getElementById('product_price').value
+    const button = document.getElementById('btn-salvar-produto');
+
+    if (name != '' && price != '') {
+        button.disabled = true;
+        document.getElementById('productsForm').submit();
+    }
+}

@@ -11,11 +11,12 @@
                 @csrf
                 <div class="modal-body">
                     <input type="hidden" id="productsData" name="productsData">
+                    <input type="hidden" id="mesaAtual" name="productsData">
 
                     <div class="search-container">
                         <input type="text" id="search-input" class="form-control" placeholder="Pesquisar produtos...">
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" style="height:400px; overflow-y:scroll;">
                         <div id="products-list">
                             <!-- Produtos serão inseridos aqui pelo JavaScript -->
                         </div>
@@ -25,8 +26,8 @@
                 <div class="modal-footer justify-content-between">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
                     <div id="total-pedido">total: R$ <span id="valor-total">0,00</span></div>
-                    <button type="submit" class="btn btn-primary">Finalizar</button>
-                </div>
+                    <button type="submit" onclick="setPedido(event)" class="btn btn-primary">Finalizar</button>
+                </div>  
             </form>
         </div>
         <!-- /.modal-content -->
