@@ -63,16 +63,17 @@
                 <!-- =========================================================== -->
                 <!-- <h5 class="mt-4 mb-2">Info Box With <code>bg-gradient-*</code></h5> -->
                 @if ($mesas)
+             
                 <div class="row">
 
                   @foreach ($mesas as $mesa)
-                  <x-mesa :id="$mesa->id" :status="$mesa->status" />
+                  <x-mesa :id="$mesa->id" :status="$mesa->status" :linked="$mesa->linked_table_id" :order="$mesa->openOrder" />
                   @endforeach
 
                 </div>
-                <div class="paginacaoLaravel">
+                {{-- <div class="paginacaoLaravel">
                   {{ $mesas->links() }}
-                </div>
+                </div> --}}
                 @endif
                 <!-- /.row -->
               </div>

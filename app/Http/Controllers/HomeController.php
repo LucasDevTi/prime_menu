@@ -13,7 +13,8 @@ class HomeController extends Controller
         if (!Auth::check()) {
             return redirect('/')->with('error', 'Você precisa estar logado para acessar essa página.');
         }
-        $tables = Table::paginate(500);
+        $tables = Table::with('openOrder')->get();
+
         $data = [
             'mesas' => $tables
         ];

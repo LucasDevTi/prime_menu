@@ -36,6 +36,8 @@ class OrderController extends Controller
 
             try {
                 $order->table_id = $request->mesa_id;
+                $order->status_payment = 1;
+                $order->description_status = "Aberto";
 
                 if ($order->save()) {
 
@@ -59,7 +61,6 @@ class OrderController extends Controller
                             $orderItem->transferred_table_id = $request->mesa_id;
 
                             if (!$orderItem->save()) {
-
                                 $success = false;
                                 break;
                             }

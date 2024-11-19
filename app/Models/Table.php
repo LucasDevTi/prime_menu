@@ -15,5 +15,14 @@ class Table extends Model
         'status',
         'description_status'
     ];
-    //
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function openOrder()
+    {
+        return $this->hasOne(Order::class)->where('status_payment', 1);
+    }
 }

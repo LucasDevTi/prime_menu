@@ -90,17 +90,19 @@ class TableController extends Controller
                 ->get();
 
             foreach ($request->mesasSelecionadas as $table_id) {
+                // if ($table_id != $request->mesaPrincipal) {
+                $table = Table::find($table_id);
                 if ($table_id != $request->mesaPrincipal) {
-                    $table = Table::find($table_id);
                     $table->linked_table_id = $request->mesaPrincipal;
-                    $table->status = 1;
-                    $table->description_status = 'Aberta';
-                    if (!$table->save()) {
-                        $success = false;
-                        break;
-                    }
-                    $table->save();
                 }
+                $table->status = 1;
+                $table->description_status = 'Aberta';
+                if (!$table->save()) {
+                    $success = false;
+                    break;
+                }
+                $table->save();
+                // }
             }
 
             if ($success) {

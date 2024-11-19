@@ -100,68 +100,9 @@ async function atualizarStatusMesa(mesa_id, status) {
     const mesa = document.querySelector(`div[data-id-mesa="${mesa_id}"]`);
 
     if (status == "1") {
-
-        $('#opcoes_mesa').modal('hide');
-        $('#opcoes_produtos_modal').modal('show');
-
-        try {
-            const response = await fetch('/get-produtos', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token, // Inclua o token CSRF para segurança
-                },
-                body: JSON.stringify({}) // Exemplo de novo status
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`ERRO: ${errorData.message}`);
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-
-                const productContainer = document.getElementById('products-list');
-                productContainer.innerHTML = '';
-
-                data.data.forEach(product => {
-                    const productElement = `
-                    <div class="content-products col-sm-12">
-                        <div class="div-products col-sm-8" id="products-list">
-                            <div class="div-item-prod" style="flex:1;">
-                                <div class="desc-product">
-                                    <h2>${product.name}</h2>
-                                    <span class="ingredients">${product.ingredients}</span>
-                                    <input type="text" class="form-control" style="width:100%;"  placeholder="Observações" />
-                                </div>
-                                <div class="price-product" style="margin-top:0px;">
-                                    R$ ${product.price}
-                                </div>
-                            </div>
-                            <div class="qtde-item text-success">
-                                <input type="number" id="qtde_${product.id}" value="0" class="text-success" disabled />
-                            </div>
-                        </div>
-                        <div class="content-qtde">
-                            <i class="fa fa-plus-circle plus-qtde" aria-hidden="true" onclick="addProduct(${product.id}, ${product.price}, ${mesa_id})"></i>
-                            <i class="fa fa-minus-circle minus-qtde" aria-hidden="true" onclick="rmvProduct(${product.id}, ${product.price}, ${mesa_id})"></i>    
-                        </div>
-                    </div>
-                `;
-                    productContainer.insertAdjacentHTML('beforeend', productElement);
-                });
-            }
-
-            // Aqui você pode fazer algo após a atualização, como recarregar a lista de mesas
-
-        } catch (error) {
-            console.error('Erro ao buscar produtos:', error);
-        }
-
+        showItems(mesa_id);
     }
-    
+
     try {
         const response = await fetch('/atualizar-status-mesa', {
             method: 'POST',
@@ -235,6 +176,7 @@ function showModalOptionsTable(mesa_id, status) {
     const mesaTrocar = document.querySelector('#div-trocar-mesa');
     const mesaPagar = document.querySelector('#div-pagar-mesa');
     const mesaInativar = document.querySelector('#div-inativar-mesa');
+    const mesaAdicionarItem = document.querySelector('#div-adicionar-item-mesa');
 
     // Define padrão as classes
     setupOption(mesaOcupar);
@@ -243,6 +185,7 @@ function showModalOptionsTable(mesa_id, status) {
     setupOption(mesaTrocar);
     setupOption(mesaPagar);
     setupOption(mesaInativar);
+    setupOption(mesaAdicionarItem);
 
     if (mesaVincular) {
         mesaVincular.setAttribute('onClick', `linkTables('${mesa_id}','0','true')`);
@@ -271,8 +214,14 @@ function showModalOptionsTable(mesa_id, status) {
         disableOptionTable(mesaFechar);
         disableOptionTable(mesaTrocar);
         disableOptionTable(mesaPagar);
+        disableOptionTable(mesaAdicionarItem);
 
     } else if (status === "1") {
+
+        if (mesaAdicionarItem) {
+            mesaAdicionarItem.setAttribute('onClick', `showItems(${mesa_id})`);
+        }
+
         disableOptionTable(mesaOcupar);
         disableOptionTable(mesaPagar);
         disableOptionTable(mesaInativar);
@@ -283,6 +232,8 @@ function showModalOptionsTable(mesa_id, status) {
         disableOptionTable(mesaVincular);
         disableOptionTable(mesaTrocar);
         disableOptionTable(mesaInativar);
+        disableOptionTable(mesaAdicionarItem);
+
     } else if (status === "4") {
         if (mesaInativar) {
             document.querySelector('#text-ativacao').innerHTML = "Ativar";
@@ -294,6 +245,8 @@ function showModalOptionsTable(mesa_id, status) {
         disableOptionTable(mesaFechar);
         disableOptionTable(mesaTrocar);
         disableOptionTable(mesaPagar);
+        disableOptionTable(mesaAdicionarItem);
+
     }
     // else if(status === "1"){
     //     mesaOcupar.removeAttribute('onClick');
@@ -415,9 +368,6 @@ async function juntarMesas() {
 
                 // enableOptionTable(mesa, mesa_id, data.status)
             }
-
-            // Aqui você pode fazer algo após a atualização, como recarregar a lista de mesas
-
         } catch (error) {
             console.error('Erro ao atualizar o status da mesa:', error);
         }
@@ -493,7 +443,7 @@ function addProduct(id_produto, valor, mesa_id) {
     const spanValorTotal = document.getElementById('valor-total');
     spanValorTotal.textContent = `R$ ${valorTotal.toFixed(2)}`;
 
-    console.log(produtos);
+    // console.log(produtos);
 }
 
 function rmvProduct(id_produto, valor, mesa_id) {
@@ -539,7 +489,7 @@ async function setPedido(event) {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': token, // Inclua o token CSRF para segurança
             },
-            body: JSON.stringify({productsData: produtosJson, mesa_id: mesaAtualMenu}) // Exemplo de novo status
+            body: JSON.stringify({ productsData: produtosJson, mesa_id: mesaAtualMenu }) // Exemplo de novo status
         });
 
         if (!response.ok) {
@@ -565,3 +515,66 @@ async function setPedido(event) {
     // Agora o formulário pode ser enviado normalmente
     this.submit(); // Isso submete o formulário após preencher o campo hidden
 };
+
+async function showItems(mesa_id) {
+
+    $('#opcoes_mesa').modal('hide');
+    $('#opcoes_produtos_modal').modal('show');
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    try {
+        const response = await fetch('/get-produtos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token, // Inclua o token CSRF para segurança
+            },
+            body: JSON.stringify({}) // Exemplo de novo status
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`ERRO: ${errorData.message}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            const productContainer = document.getElementById('products-list');
+            productContainer.innerHTML = '';
+
+            data.data.forEach(product => {
+                const productElement = `
+                <div class="content-products col-sm-12">
+                    <div class="div-products col-sm-8" id="products-list">
+                        <div class="div-item-prod" style="flex:1;">
+                            <div class="desc-product">
+                                <h2>${product.name}</h2>
+                                <span class="ingredients">${product.ingredients}</span>
+                                <input type="text" class="form-control" style="width:100%;"  placeholder="Observações" />
+                            </div>
+                            <div class="price-product" style="margin-top:0px;">
+                                R$ ${product.price}
+                            </div>
+                        </div>
+                        <div class="qtde-item text-success">
+                            <input type="number" id="qtde_${product.id}" value="0" class="text-success" disabled />
+                        </div>
+                    </div>
+                    <div class="content-qtde">
+                        <i class="fa fa-plus-circle plus-qtde" aria-hidden="true" onclick="addProduct(${product.id}, ${product.price}, ${mesa_id})"></i>
+                        <i class="fa fa-minus-circle minus-qtde" aria-hidden="true" onclick="rmvProduct(${product.id}, ${product.price}, ${mesa_id})"></i>    
+                    </div>
+                </div>
+            `;
+                productContainer.insertAdjacentHTML('beforeend', productElement);
+            });
+        }
+
+        // Aqui você pode fazer algo após a atualização, como recarregar a lista de mesas
+
+    } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+    }
+}

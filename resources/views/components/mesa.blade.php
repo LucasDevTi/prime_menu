@@ -20,14 +20,28 @@ if ($status == '0') {
         <span class="info-box-icon">{{$id}}</i></span>
 
         <div class="info-box-content align-items-end">
-            <span class="info-box-text"><i class="fas fa-user"></i> <span class="reserve">1</span></span>
-            <span class="info-box-number">41,50</span>
+            @if($linked)
+            <span class="info-box-text"><i class="fas fa-link"></i> <span class="reserve">{{$linked}}</span></span>
+            @else
+            <span class="info-box-text"><i class="fas fa-user"></i></span>
+            @endif
+            <span class="info-box-number">
+                @if($order)
+                {{$order->total_value}}
+                @else
+                    @if($linked)
+                    --
+                    @else
+                    0.00
+                    @endif
+                @endif
+            </span>
 
             <!-- <div class="progress">
                           <div class="progress-bar" style="width: 70%"></div>
                         </div> -->
             <span class="progress-description">
-                10:30
+                --
             </span>
         </div>
         <!-- /.info-box-content -->
