@@ -25,7 +25,7 @@
                 </div>
                 <div class="modal-footer justify-content-between">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
-                    <div id="total-pedido">total: R$ <span id="valor-total">0,00</span></div>
+                    <div id="total-pedido">total: <span id="valor-total">0,00</span></div>
                     <button type="submit" onclick="setPedido(event)" class="btn btn-primary">Finalizar</button>
                 </div>  
             </form>
