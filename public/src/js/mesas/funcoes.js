@@ -125,6 +125,10 @@ async function atualizarStatusMesa(mesa_id, status) {
 
             $('#opcoes_mesa').modal('hide');
 
+            if (status == "2") {
+                location.reload();
+            }
+
             enableOptionTable(mesa, mesa_id, data.status)
         }
 
@@ -144,6 +148,7 @@ function disableOptionTable(table) {
 }
 
 function enableOptionTable(table, table_id, status) {
+
     if (status === "0") {
         table.className = '';
         table.classList.add('info-box', 'bg-gradient-success', 'mesa');

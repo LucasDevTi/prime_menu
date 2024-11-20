@@ -53,6 +53,39 @@ class TableController extends Controller
         $mesa->status = $request->novo_status;
 
         if ($mesa->save()) {
+
+            // Caso existir mesas vinculadas
+            if ($request->novo_status == 2) {
+
+                if ($mesa->linked_table_id) {
+                    $linked_id = $mesa->linked_table_id;
+                } else {
+                    $linked_id = $request->mesa_id;
+                }
+
+                $linked_tables = Table::where('linked_table_id', $linked_id)->get();
+
+                if ($linked_tables->isNotEmpty()) {
+                    foreach ($linked_tables as $linked_table) {
+                        $table_linked = Table::find($linked_table->id);
+                        if ($table_linked) {
+                            $table_linked->status = 2;
+                            $table_linked->description_status = 'Fechada';
+                            $table_linked->save();
+
+                            if ($mesa->linked_table_id) {
+                                $mesa_pai = Table::find($linked_id);
+                                if ($mesa_pai) {
+                                    $mesa_pai->status = 2;
+                                    $mesa_pai->description_status = 'Fechada';
+                                    $mesa_pai->save();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             return response()->json([
                 'message' => 'Status atualizado com sucesso!',
                 'success' => true,
