@@ -1,12 +1,10 @@
 let selecionandoMesas = false;
 let mesasSelecionadas = [];
 
-// Array para armazenar os produtos
 let produtos = [];
 let produtosTransferencia = [];
 let mesaAtualMenu = [];
 let mesaAtualTranferencia = []
-// Variável para o valor total
 let valorTotal = 0;
 
 async function buscaCliente() {
@@ -100,10 +98,6 @@ async function atualizarStatusMesa(mesa_id, status) {
 
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const mesa = document.querySelector(`div[data-id-mesa="${mesa_id}"]`);
-
-    if (status == "1") {
-        showItems(mesa_id);
-    }
 
     try {
         const response = await fetch('/atualizar-status-mesa', {
@@ -280,17 +274,18 @@ function showModalOptionsTable(mesa_id, status) {
         disableOptionTable(mesaAdicionarItem);
 
     }
-    // else if(status === "1"){
-    //     mesaOcupar.removeAttribute('onClick');
-    //     mesaOcupar.className = '';
-    //     mesaOcupar.classList.add('info-box', 'bg-gradient-secondary', 'btn-opcoes-mesa');
-    // }
 
     $('#opcoes_mesa').modal('show');
 }
 
 function changeStatusTable(mesa_id, status) {
-    atualizarStatusMesa(mesa_id, status);
+
+    if (status != "1") {
+        atualizarStatusMesa(mesa_id, status);
+        console.log("executou");
+    } else if (status == "1") {
+        showItems(mesa_id);
+    }
 }
 
 function linkTables(table_id, table_id_link, showTables = true) {
@@ -453,7 +448,7 @@ function showModalProdEdit(name, ingredients, price, id) {
 function addProduct(id_produto, valor, mesa_id) {
     // Verifica se o produto já existe no array
     let produto = produtos.find(p => p.id === id_produto);
-
+    console.log(produtos);
     if (produto) {
         // Se o produto já existe, aumenta a quantidade e recalcula o valor total
         produto.quantidade += 1;
@@ -554,6 +549,14 @@ async function showItems(mesa_id) {
     $('#opcoes_produtos_modal').modal('show');
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+    produtos = [];
+    produtosTransferencia = [];
+    mesaAtualMenu = [];
+    mesaAtualTranferencia = []
+    valorTotal = 0;
+    const spanValorTotal = document.getElementById('valor-total');
+    spanValorTotal.textContent = `R$ ${valorTotal.toFixed(2)}`;
+
     try {
         const response = await fetch('/get-produtos', {
             method: 'POST',
@@ -615,7 +618,7 @@ async function changeTable(table_id) {
 
     $('#opcoes_mesa').modal('hide');
     $('#modal-transferencia-itens').modal('show');
-    
+
     const selectMesas = document.getElementById('mesas-disponiveis-transferencia');
     selectMesas.innerHTML = '<option selected value="0">Selecione</option>';
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');

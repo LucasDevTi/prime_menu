@@ -95,7 +95,10 @@ class OrderController extends Controller
                     }
 
                     if ($success) {
-
+                        if ($table->status == 0) {
+                            $table->status = 1;
+                            $table->save();
+                        }
                         DB::commit();
                         return response()->json([
                             'message' => 'Status atualizado com sucesso!',
@@ -159,7 +162,7 @@ class OrderController extends Controller
                         ];
                     });
 
-                    $tables = Table::whereIn('status', [0,1])->get();
+                    $tables = Table::whereIn('status', [0, 1])->get();
 
                     return response()->json([
                         'message' => 'Itens do pedido encontrados com sucesso!',
