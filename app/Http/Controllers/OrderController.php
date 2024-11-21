@@ -25,7 +25,6 @@ class OrderController extends Controller
 
         $produtos = json_decode($request->input('productsData'), true);
 
-        $flag_new_order = true;
         if (!empty($produtos)) {
 
             DB::beginTransaction();
@@ -41,15 +40,15 @@ class OrderController extends Controller
 
                 if ($table->linked_table_id) {
                     $table_id = $table->linked_table_id;
-                    $order_2 = Order::where('table_id', $table_id)->get();
-
-                    if ($order_2->isNotEmpty()) {
-                        $flag_new_order = false;
-                        $order_2 = $order_2->first();
-                        $order = Order::find($order_2->id);
-                    }
                 } else {
                     $table_id = $request->mesa_id;
+                }
+
+                $order_2 = Order::where('table_id', $table_id)->get();
+
+                if ($order_2->isNotEmpty()) {
+                    $order_2 = $order_2->first();
+                    $order = Order::find($order_2->id);
                 }
 
                 $order->table_id = $table_id;
@@ -58,6 +57,7 @@ class OrderController extends Controller
 
                 // if ($flag_new_order) {
                 if ($order->save()) {
+
 
                     $orderId = $order->id;
 
@@ -68,21 +68,34 @@ class OrderController extends Controller
                         if ($item) {
 
                             $price = $item['price'] * $produto['quantidade'];
-                            $orderItem = new OrderItems();
 
-                            $orderItem->order_id = $orderId;
-                            $orderItem->product_id = $produto['id'];
+                            $orderItemRepeat = OrderItems::where('order_id', $orderId)
+                                ->where('product_id', $produto['id'])
+                                ->first();
 
-                            $orderItem->quantity = $produto['quantidade'];
-                            $orderItem->price += $price;
-                            $orderItem->sub_total = $price;
-                            // $orderItem->transferred_table_id = $request->mesa_id;
+                            if ($orderItemRepeat) {
+                                $orderItem = OrderItems::find($orderItemRepeat->id);
+                                // print_r($orderItem);
+                                // exit;
+                                $orderItem->quantity += $produto['quantidade'];
+                            } else {
+
+                                $orderItem = new OrderItems();
+                                $orderItem->quantity = $produto['quantidade'];
+                                $orderItem->order_id = $orderId;
+                                $orderItem->product_id = $produto['id'];
+                            }
+
+                            $totalPrice = $orderItem->price += $price;
+                            $orderItem->price = $price;
+                            $orderItem->sub_total = $totalPrice;
 
                             if (!$orderItem->save()) {
                                 $success = false;
                                 break;
                             }
-
+                            // print_r($success);
+                            // exit;
                             $valorTotal += $orderItem->price;
                         }
                     }
@@ -97,6 +110,7 @@ class OrderController extends Controller
                     if ($success) {
                         if ($table->status == 0) {
                             $table->status = 1;
+                            $table->description_status = "Aberta";
                             $table->save();
                         }
                         DB::commit();

@@ -16,31 +16,31 @@ class TableFactory extends Factory
      */
     public function definition(): array
     {
-        $status = rand(0, 4);
-        switch ($status) {
-            case 0:
-                $descriptionStatus = "Liberada";
-                break;
-            case 1:
-                $descriptionStatus = "Aberta";
-                break;
-            case 2:
-                $descriptionStatus = "Fechada";
-                break;
-            case 3:
-                $descriptionStatus = "Reservada";
-                break;
-            case 4:
-                $descriptionStatus = "Inativa";
-                break;
-            default:
-                $descriptionStatus = "teste";
-                break;
-        }
+        // $status = rand(0, 4);
+        // switch ($status) {
+        //     case 0:
+        //         $descriptionStatus = "Liberada";
+        //         break;
+        //     case 1:
+        //         $descriptionStatus = "Aberta";
+        //         break;
+        //     case 2:
+        //         $descriptionStatus = "Fechada";
+        //         break;
+        //     case 3:
+        //         $descriptionStatus = "Reservada";
+        //         break;
+        //     case 4:
+        //         $descriptionStatus = "Inativa";
+        //         break;
+        //     default:
+        //         $descriptionStatus = "teste";
+        //         break;
+        // }
 
         return [
-            'status' =>  $status,
-            'description_status' => $descriptionStatus
+            'status' =>  0,
+            'description_status' => "Liberada"
 
         ];
     }
