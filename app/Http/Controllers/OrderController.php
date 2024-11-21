@@ -24,7 +24,7 @@ class OrderController extends Controller
         ]);
 
         $produtos = json_decode($request->input('productsData'), true);
-        // $produtos = $request->productsData;
+
         $flag_new_order = true;
         if (!empty($produtos)) {
 
@@ -57,59 +57,59 @@ class OrderController extends Controller
                 $order->description_status = "Aberto";
 
                 // if ($flag_new_order) {
-                    if ($order->save()) {
+                if ($order->save()) {
 
-                        $orderId = $order->id;
+                    $orderId = $order->id;
 
-                        foreach ($produtos as $produto) {
+                    foreach ($produtos as $produto) {
 
-                            $item = Product::find($produto['id']);
+                        $item = Product::find($produto['id']);
 
-                            if ($item) {
+                        if ($item) {
 
-                                $price = $item['price'] * $produto['quantidade'];
-                                $orderItem = new OrderItems();
+                            $price = $item['price'] * $produto['quantidade'];
+                            $orderItem = new OrderItems();
 
-                                $orderItem->order_id = $orderId;
-                                $orderItem->product_id = $produto['id'];
+                            $orderItem->order_id = $orderId;
+                            $orderItem->product_id = $produto['id'];
 
-                                $orderItem->quantity = $produto['quantidade'];
-                                $orderItem->price += $price;
-                                $orderItem->sub_total = $price;
-                                $orderItem->transferred_table_id = $request->mesa_id;
+                            $orderItem->quantity = $produto['quantidade'];
+                            $orderItem->price += $price;
+                            $orderItem->sub_total = $price;
+                            // $orderItem->transferred_table_id = $request->mesa_id;
 
-                                if (!$orderItem->save()) {
-                                    $success = false;
-                                    break;
-                                }
-
-                                $valorTotal += $orderItem->price;
+                            if (!$orderItem->save()) {
+                                $success = false;
+                                break;
                             }
-                        }
 
-                        $orderToUpdate = Order::find($orderId);
-                        $orderToUpdate->total_value += $valorTotal;
-
-                        if (!$orderToUpdate->save()) {
-                            $success = false;
-                        }
-
-                        if ($success) {
-
-                            DB::commit();
-                            return response()->json([
-                                'message' => 'Status atualizado com sucesso!',
-                                'success' => true,
-                                'status' => ''
-                            ], 200);
-                        } else {
-                            DB::rollBack();
-                            return response()->json([
-                                'message' => 'Ocorreu um erro ao atualizar as mesas.',
-                                'success' => false
-                            ], 500);
+                            $valorTotal += $orderItem->price;
                         }
                     }
+
+                    $orderToUpdate = Order::find($orderId);
+                    $orderToUpdate->total_value += $valorTotal;
+
+                    if (!$orderToUpdate->save()) {
+                        $success = false;
+                    }
+
+                    if ($success) {
+
+                        DB::commit();
+                        return response()->json([
+                            'message' => 'Status atualizado com sucesso!',
+                            'success' => true,
+                            'status' => ''
+                        ], 200);
+                    } else {
+                        DB::rollBack();
+                        return response()->json([
+                            'message' => 'Ocorreu um erro ao atualizar as mesas.',
+                            'success' => false
+                        ], 500);
+                    }
+                }
                 // }
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -118,4 +118,81 @@ class OrderController extends Controller
             }
         }
     }
+
+    public function getProductsByTable(Request $request)
+    {
+        if (!Auth::check()) {
+            return redirect('/')->with('error', 'Você precisa estar logado para acessar essa página.');
+        }
+
+        $request->validate([
+            'table_id' => 'required|exists:tables,id'
+        ]);
+
+        $table = Table::find($request->table_id);
+
+        if ($table) {
+
+            $id = $table->id;
+            if ($table->linked_table_id) {
+                $id = $table->linked_table_id;
+            }
+
+            $order = Order::where('table_id', $id)->get();
+
+            if ($order->isNotEmpty()) {
+
+                $order = $order->first();
+
+                $orderItems = OrderItems::where('order_id', $order->id)->with('product')->get();
+
+                if ($orderItems->isNotEmpty()) {
+
+                    $orderItemsWithProductNames = $orderItems->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'order_id' => $item->order_id,
+                            'product_id' => $item->product_id,
+                            'quantity' => $item->quantity,
+                            'price' => $item->price,
+                            'product_name' => $item->product->name ?? 'Produto não encontrado', // Relacionamento carregado
+                        ];
+                    });
+
+                    $tables = Table::whereIn('status', [0,1])->get();
+
+                    return response()->json([
+                        'message' => 'Itens do pedido encontrados com sucesso!',
+                        'success' => true,
+                        'status' => 'success',
+                        'orderItems' => $orderItemsWithProductNames,
+                        'tables' => $tables
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'message' => 'Nenhum item encontrado para o pedido.',
+                        'success' => false,
+                        'status' => 'error',
+                        'orderItems' => [],
+                    ], 400);
+                }
+            } else {
+                return response()->json([
+                    'message' => 'Nenhum pedido encontrado.',
+                    'success' => false,
+                    'status' => 'error',
+                    'orderItems' => [],
+                ], 400);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Nenhuma mesa encontrada.',
+                'success' => false,
+                'status' => 'error',
+                'orderItems' => [],
+            ], 400);
+        }
+    }
+
+    public function changeTable(Request $request) {}
 }

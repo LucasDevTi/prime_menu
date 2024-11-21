@@ -30,4 +30,7 @@ Route::post('/deletar-produto', [ProductsController::class, 'deleteProduct'])->n
 Route::post('/get-produtos', [ProductsController::class, 'getAllProducts'])->name('get-produtos');
 
 Route::post('/set-order', [OrderController::class, 'setOrder'])->name('set-order');
+Route::post('/get-itens-by-table', [OrderController::class, 'getProductsByTable'])->name('get-itens-by-table');
+Route::post('/set-transferencia', [OrderController::class, 'changeTable'])->name('set-transferencia');
+
 

@@ -3,7 +3,9 @@ let mesasSelecionadas = [];
 
 // Array para armazenar os produtos
 let produtos = [];
+let produtosTransferencia = [];
 let mesaAtualMenu = [];
+let mesaAtualTranferencia = []
 // Variável para o valor total
 let valorTotal = 0;
 
@@ -182,6 +184,8 @@ function showModalOptionsTable(mesa_id, status) {
     const mesaPagar = document.querySelector('#div-pagar-mesa');
     const mesaInativar = document.querySelector('#div-inativar-mesa');
     const mesaAdicionarItem = document.querySelector('#div-adicionar-item-mesa');
+    const inputValorMesa = document.getElementById(`valor_mesa_${mesa_id}`);
+    let valueInputMesaValor = inputValorMesa.value.split("_");
 
     // Define padrão as classes
     setupOption(mesaOcupar);
@@ -209,6 +213,11 @@ function showModalOptionsTable(mesa_id, status) {
         mesaVincular.setAttribute('onClick', `getMesas ('${mesa_id}','2')`);
     }
 
+    if (mesaTrocar) {
+        mesaTrocar.setAttribute('onClick', `changeTable('${mesa_id}')`);
+    }
+
+
     if (status === "0" || status === "3") {
 
         if (mesaOcupar) {
@@ -225,6 +234,24 @@ function showModalOptionsTable(mesa_id, status) {
 
         if (mesaAdicionarItem) {
             mesaAdicionarItem.setAttribute('onClick', `showItems(${mesa_id})`);
+        }
+
+        // Caso o valor da mesa seja 0 ou seja não tenha pedido
+        if (valueInputMesaValor[0] == "0") {
+            disableOptionTable(mesaTrocar);
+        }
+
+        // Caso exista linkagem de mesa e o valor da mesa pai seja diferente de zero
+        if (valueInputMesaValor[1] != "0") {
+            const mesaPrincipal = document.getElementById(`valor_mesa_${valueInputMesaValor[1]}`);
+            let valueInputMesaValorPrincipal = mesaPrincipal.value.split("_");
+
+            if (valueInputMesaValorPrincipal[0] != "0") {
+                setupOption(mesaTrocar);
+                if (mesaTrocar) {
+                    mesaTrocar.setAttribute('onClick', `changeTable('${mesa_id}')`);
+                }
+            }
         }
 
         disableOptionTable(mesaOcupar);
@@ -583,3 +610,168 @@ async function showItems(mesa_id) {
         console.error('Erro ao buscar produtos:', error);
     }
 }
+
+async function changeTable(table_id) {
+
+    $('#opcoes_mesa').modal('hide');
+    $('#modal-transferencia-itens').modal('show');
+    
+    const selectMesas = document.getElementById('mesas-disponiveis-transferencia');
+    selectMesas.innerHTML = '<option selected value="0">Selecione</option>';
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    try {
+        const response = await fetch('/get-itens-by-table', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token, // Inclua o token CSRF para segurança
+            },
+            body: JSON.stringify({ table_id: table_id }) // Exemplo de novo status
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`ERRO: ${errorData.message}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            const productOrderContainer = document.querySelector('.content-products-order-list');
+            productOrderContainer.innerHTML = '';
+
+            data.orderItems.forEach(product => {
+                const productElement = `
+                <div class="products-order-list">
+                    <div class="item-da-mesa">                            
+                        <span><strong>${product.product_name} | quantidade: ${product.quantity}</strong></span>
+                    </div>
+                    <div class="content-qtde-transferencia">  
+                        <i class="fa fa-plus-circle plus-qtde" aria-hidden="true" onclick="addProductTransferencia(${product.product_id}, ${product.quantity}, ${table_id})"></i>
+                        <input type="number" class="form-control qtde-max-tranferencia" id="qtde-max-${product.product_id}" value="0" disabled>
+                        <i class="fa fa-minus-circle minus-qtde" aria-hidden="true" onclick="rmvProductTransferencia(${product.product_id}, ${product.quantity}, ${table_id})"></i>    
+                    </div>
+                </div>
+            `;
+                productOrderContainer.insertAdjacentHTML('beforeend', productElement);
+            });
+
+            data.tables.forEach(table => {
+                const option = document.createElement('option');  // Cria o elemento <option>
+                option.value = table.id;                          // Define o valor como o id da mesa
+                option.textContent = `Mesa: ${table.id} - ${table.description_status}`;    // Define o texto como o status da mesa
+                selectMesas.appendChild(option);                  // Adiciona a opção ao <select>
+            });
+
+            console.log(data.tables);
+        }
+
+        // Aqui você pode fazer algo após a atualização, como recarregar a lista de mesas
+
+    } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+    }
+}
+
+function handleChange(element) {
+
+    const productOrderContainer = document.querySelector('.content-products-order-list');
+
+    if (element.value == 1) {
+        productOrderContainer.style.display = 'none';
+    } else {
+        productOrderContainer.style.display = 'flex';
+    }
+}
+
+function addProductTransferencia(id_produto, quantidade, mesa_id) {
+    // Verifica se o produto já existe no array
+    let produto = produtosTransferencia.find(p => p.id === id_produto);
+
+    if (produto) {
+        // Se o produto já existe, aumenta a quantidade e recalcula o valor total
+        produto.quantidade += 1;
+
+        if (produto.quantidade > quantidade) {
+            produto.quantidade = quantidade;
+        }
+
+        document.getElementById(`qtde-max-${id_produto}`).value = produto.quantidade
+
+    } else {
+        // Se o produto não existir, cria um novo objeto e adiciona ao array
+        produto = { id: id_produto, quantidade: 1 };
+        produtosTransferencia.push(produto);
+        mesaAtualTranferencia = mesa_id;
+
+        document.getElementById(`qtde-max-${id_produto}`).value = 1
+    }
+}
+
+function rmvProductTransferencia(id_produto, quantidade, mesa_id) {
+    // Encontra o produto no array
+    let produto = produtosTransferencia.find(p => p.id === id_produto);
+
+    if (produto && produto.quantidade > 0) {
+        // Se o produto existir e a quantidade for maior que 0, diminui a quantidade
+        produto.quantidade -= 1;
+        // Se a quantidade chegar a 0, remove o produto do array
+        if (produto.quantidade === 0) {
+            produtosTransferencia = produtosTransferencia.filter(p => p.id !== id_produto);
+            document.getElementById(`qtde-max-${id_produto}`).value = 0
+        }
+        document.getElementById(`qtde-max-${id_produto}`).value = produto.quantidade
+
+        mesaAtualTranferencia = mesa_id;
+    }
+}
+
+
+
+async function transferir(event) {
+
+    event.preventDefault();
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const produtosJson = JSON.stringify(produtosTransferencia);
+    const radios = document.getElementsByName('opcao-transferencia');
+    const opcao = 0;
+
+    for (let radios of radio) {
+        if (radio.checked) {
+            opcao = radio.value;
+            break;
+        }
+    }
+
+    if (parseInt(opcao) != 0) {
+        try {
+            const response = await fetch('/set-transferencia', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                },
+                body: JSON.stringify({ productsData: produtosJson, mesa_id: mesaAtualTranferencia, opcao: opcao })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`ERRO: ${errorData.message}`);
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+
+                location.reload();
+            }
+
+        } catch (error) {
+            console.error('Erro ao atualizar o status da mesa:', error);
+        }
+        document.getElementById('productsData').value = produtosJson;
+    }
+
+};

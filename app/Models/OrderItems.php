@@ -15,4 +15,9 @@ class OrderItems extends Model
         'sub_total',
         'transferred_table_id'
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id'); // 'product_id' é a chave estrangeira
+    }
 }

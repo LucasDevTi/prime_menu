@@ -18,7 +18,18 @@ if ($status == '0') {
         data-status="{{$status}}"
         onclick="acaoMesa(this)">
         <span class="info-box-icon">{{$id}}</i></span>
-
+        @php
+        $table_linked_id = $linked ? $linked : "0";
+        @endphp
+        @if($order)
+        <input type="hidden" aria-hidden="true" id="valor_mesa_{{$id}}" value = "{{$order->total_value}}_{{ $table_linked_id }}">
+        @else
+            @if($linked)
+            <input type="hidden" aria-hidden="true" id="valor_mesa_{{$id}}" value = "0_{{ $table_linked_id }}">
+            @else
+            <input type="hidden" aria-hidden="true" id="valor_mesa_{{$id}}" value = "0_{{ $table_linked_id }}">
+            @endif
+        @endif
         <div class="info-box-content align-items-end">
             @if($linked)
             <span class="info-box-text"><i class="fas fa-link"></i> <span class="reserve">{{$linked}}</span></span>

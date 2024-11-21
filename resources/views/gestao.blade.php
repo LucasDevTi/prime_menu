@@ -118,6 +118,8 @@
       <x-opcoes_mesas />
 
       <x-opcoes_produtos_modal />
+
+      <x-modal-transferencia />
     </div>
     <!-- /.content -->
   </div>
