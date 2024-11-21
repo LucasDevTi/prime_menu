@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
+use App\Models\OrderItems;
 use App\Models\Table;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -122,36 +124,84 @@ class TableController extends Controller
                 ->where('id', '!=', $mesaPrincipal)
                 ->get();
 
+            // print_r($request->mesasSelecionadas);
+            // print_r($request->mesaPrincipal);
+            // exit;
             foreach ($request->mesasSelecionadas as $table_id) {
-                // if ($table_id != $request->mesaPrincipal) {
                 $table = Table::find($table_id);
+            
                 if ($table_id != $request->mesaPrincipal) {
                     $table->linked_table_id = $request->mesaPrincipal;
+                    $order = Order::where('table_id', $table_id)->first();
+            
+                    if ($order) {
+                        $orderPrincipal = Order::where('table_id', $request->mesaPrincipal)->first();
+            
+                        if ($orderPrincipal) {
+                            $orderPrincipal->total_value += $order->total_value;
+            
+                            $orderItens = OrderItems::where('order_id', $order->id)->get();
+            
+                            if ($orderItens->isNotEmpty()) {
+                                foreach ($orderItens as $item) {
+                                    // Verifica se o item já existe na ordem principal
+                                    $existItem = OrderItems::where('order_id', $orderPrincipal->id)
+                                        ->where('product_id', $item['product_id'])
+                                        ->first();
+            
+                                    if ($existItem) {
+                                        // Atualiza o item existente
+                                        $existItem->quantity += $item->quantity;
+                                        $existItem->sub_total += $item->sub_total;
+                                        $existItem->save();
+            
+                                        // Remove o item antigo
+                                        $item->delete();
+                                    } else {
+                                        // Transfere o item para a ordem principal
+                                        $newItem = $item->replicate(); // Clona o item
+                                        $newItem->order_id = $orderPrincipal->id;
+                                        $newItem->save();
+            
+                                        // Remove o item antigo
+                                        $item->delete();
+                                    }
+                                }
+                            }
+            
+                            // Salva a ordem principal
+                            $orderPrincipal->save();
+                            // Remove a ordem antiga
+                            $order->delete();
+                        }
+                    }
                 }
+            
+                // Atualiza o status da mesa
                 $table->status = 1;
                 $table->description_status = 'Aberta';
+            
                 if (!$table->save()) {
                     $success = false;
                     break;
                 }
-                $table->save();
-                // }
             }
-
+            
             if ($success) {
                 DB::commit();
                 return response()->json([
                     'message' => 'Status atualizado com sucesso!',
                     'success' => true,
-                    'status' => $mesaPrincipal
+                    'status' => $mesaPrincipal,
                 ], 200);
             } else {
                 DB::rollBack();
                 return response()->json([
                     'message' => 'Ocorreu um erro ao atualizar as mesas.',
-                    'success' => false
+                    'success' => false,
                 ], 500);
             }
+            
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Erro interno ao tentar vincular as mesas.'], 500);
