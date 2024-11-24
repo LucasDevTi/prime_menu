@@ -15,11 +15,11 @@
 
                     <div class="card-body" style="height:400px; overflow-y:scroll;">
                         <div class="custom-control custom-radio">
-                            <input class="custom-control-input" type="radio" id="transfere-todos" name="opcao-tranferencia" value="1" onchange="handleChange(this)">
+                            <input class="custom-control-input" type="radio" id="transfere-todos" name="opcao-transferencia" value="1" onchange="handleChange(this)">
                             <label for="transfere-todos" class="custom-control-label">Transferir todos os itens</label>
                         </div>
                         <div class="custom-control custom-radio">
-                            <input class="custom-control-input" type="radio" id="transfere-alguns" name="opcao-tranferencia" value="2" onchange="handleChange(this)">
+                            <input class="custom-control-input" type="radio" id="transfere-alguns" name="opcao-transferencia" value="2" onchange="handleChange(this)">
                             <label for="transfere-alguns" class="custom-control-label">Escolher itens para trasferência</label>
                         </div>
 

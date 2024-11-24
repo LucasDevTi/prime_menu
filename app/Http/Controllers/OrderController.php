@@ -55,9 +55,7 @@ class OrderController extends Controller
                 $order->status_payment = 1;
                 $order->description_status = "Aberto";
 
-                // if ($flag_new_order) {
                 if ($order->save()) {
-
 
                     $orderId = $order->id;
 
@@ -75,8 +73,6 @@ class OrderController extends Controller
 
                             if ($orderItemRepeat) {
                                 $orderItem = OrderItems::find($orderItemRepeat->id);
-                                // print_r($orderItem);
-                                // exit;
                                 $orderItem->quantity += $produto['quantidade'];
                             } else {
 
@@ -89,7 +85,8 @@ class OrderController extends Controller
                             $totalPrice = $orderItem->price += $price;
                             $orderItem->price = $price;
                             $orderItem->sub_total = $totalPrice;
-
+                            $orderItem->table_id = $table_id;
+                            
                             if (!$orderItem->save()) {
                                 $success = false;
                                 break;

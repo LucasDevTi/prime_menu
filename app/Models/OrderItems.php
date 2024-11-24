@@ -13,7 +13,7 @@ class OrderItems extends Model
         'quantity',
         'price',
         'sub_total',
-        'transferred_table_id'
+        'table_id'
     ];
 
     public function product()

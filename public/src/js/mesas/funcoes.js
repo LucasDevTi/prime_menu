@@ -448,7 +448,7 @@ function showModalProdEdit(name, ingredients, price, id) {
 function addProduct(id_produto, valor, mesa_id) {
     // Verifica se o produto já existe no array
     let produto = produtos.find(p => p.id === id_produto);
-    console.log(produtos);
+
     if (produto) {
         // Se o produto já existe, aumenta a quantidade e recalcula o valor total
         produto.quantidade += 1;
@@ -554,6 +554,7 @@ async function showItems(mesa_id) {
     mesaAtualMenu = [];
     mesaAtualTranferencia = []
     valorTotal = 0;
+
     const spanValorTotal = document.getElementById('valor-total');
     spanValorTotal.textContent = `R$ ${valorTotal.toFixed(2)}`;
 
@@ -615,6 +616,12 @@ async function showItems(mesa_id) {
 }
 
 async function changeTable(table_id) {
+
+    produtos = [];
+    produtosTransferencia = [];
+    mesaAtualMenu = [];
+    mesaAtualTranferencia = []
+    valorTotal = 0;
 
     $('#opcoes_mesa').modal('hide');
     $('#modal-transferencia-itens').modal('show');
@@ -692,9 +699,9 @@ function handleChange(element) {
 function addProductTransferencia(id_produto, quantidade, mesa_id) {
     // Verifica se o produto já existe no array
     let produto = produtosTransferencia.find(p => p.id === id_produto);
+    mesaAtualTranferencia = mesa_id;
 
     if (produto) {
-        // Se o produto já existe, aumenta a quantidade e recalcula o valor total
         produto.quantidade += 1;
 
         if (produto.quantidade > quantidade) {
@@ -707,15 +714,18 @@ function addProductTransferencia(id_produto, quantidade, mesa_id) {
         // Se o produto não existir, cria um novo objeto e adiciona ao array
         produto = { id: id_produto, quantidade: 1 };
         produtosTransferencia.push(produto);
-        mesaAtualTranferencia = mesa_id;
-
         document.getElementById(`qtde-max-${id_produto}`).value = 1
+
     }
+
+    console.log(produtosTransferencia);
+
 }
 
 function rmvProductTransferencia(id_produto, quantidade, mesa_id) {
     // Encontra o produto no array
     let produto = produtosTransferencia.find(p => p.id === id_produto);
+    mesaAtualTranferencia = mesa_id;
 
     if (produto && produto.quantidade > 0) {
         // Se o produto existir e a quantidade for maior que 0, diminui a quantidade
@@ -727,8 +737,10 @@ function rmvProductTransferencia(id_produto, quantidade, mesa_id) {
         }
         document.getElementById(`qtde-max-${id_produto}`).value = produto.quantidade
 
-        mesaAtualTranferencia = mesa_id;
     }
+
+    console.log(produtosTransferencia);
+
 }
 
 
@@ -739,16 +751,22 @@ async function transferir(event) {
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const produtosJson = JSON.stringify(produtosTransferencia);
     const radios = document.getElementsByName('opcao-transferencia');
-    const opcao = 0;
-
-    for (let radios of radio) {
+    let opcao = 0;
+    console.log(produtosJson)
+    console.log(mesaAtualTranferencia);
+    const mesaTransferir = document.getElementById('mesas-disponiveis-transferencia');
+    for (let radio of radios) { 
         if (radio.checked) {
             opcao = radio.value;
             break;
         }
     }
 
-    if (parseInt(opcao) != 0) {
+    console.log(opcao);
+    console.log(mesaTransferir.value);
+
+return
+    if (parseInt(opcao) != 0 && parseInt(mesaTransferir.value) != 0) {
         try {
             const response = await fetch('/set-transferencia', {
                 method: 'POST',

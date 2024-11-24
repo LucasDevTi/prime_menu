@@ -104,8 +104,7 @@ class TableController extends Controller
 
     public function linkTables(Request $request)
     {
-
-        $validated = $request->validate([
+        $request->validate([
             'mesasSelecionadas' => 'required|array',
             'mesasSelecionadas.*' => 'exists:tables,id',  // Verifica se as mesas existem na tabela
             'mesaPrincipal' => 'required|exists:tables,id',  // Verifica se a mesa principal existe
@@ -114,30 +113,24 @@ class TableController extends Controller
         DB::beginTransaction();
 
         $success = true;
-        $mesaStatus = null;
-
         try {
-            $mesasSelecionadas = $request->mesasSelecionadas;
+
             $mesaPrincipal = $request->mesaPrincipal;
 
-            $mesas = Table::whereIn('id', $mesasSelecionadas)
-                ->where('id', '!=', $mesaPrincipal)
-                ->get();
-
-            // print_r($request->mesasSelecionadas);
-            // print_r($request->mesaPrincipal);
-            // exit;
             foreach ($request->mesasSelecionadas as $table_id) {
+
                 $table = Table::find($table_id);
             
                 if ($table_id != $request->mesaPrincipal) {
+
                     $table->linked_table_id = $request->mesaPrincipal;
                     $order = Order::where('table_id', $table_id)->first();
             
                     if ($order) {
-                        $orderPrincipal = Order::where('table_id', $request->mesaPrincipal)->first();
+                        $orderPrincipal = Order::where('table_id', $request->mesaPrincipal)->first(); // pedido da mesa Principal.
             
                         if ($orderPrincipal) {
+                            
                             $orderPrincipal->total_value += $order->total_value;
             
                             $orderItens = OrderItems::where('order_id', $order->id)->get();
