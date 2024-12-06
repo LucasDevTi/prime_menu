@@ -4,6 +4,13 @@
 <x-header />
 
 <body class="hold-transition sidebar-mini">
+    <div id="waiting" class="box-waiting">
+        <div class="loading-icon">
+            <i class="fas fa-spinner"></i>
+        </div>
+        
+    </div>
+
     <div class="wrapper">
 
         <x-navbar />

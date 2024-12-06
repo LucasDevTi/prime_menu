@@ -1,4 +1,4 @@
-<div class="modal fade" id="opcoes_produtos_modal">
+<div class="modal fade" id="modal-products-options">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -7,11 +7,11 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="opcoesFormProd" method="POST" action="{{route('set-order')}}">
+            <form method="POST" action="{{route('set-order')}}">
                 @csrf
                 <div class="modal-body">
-                    <input type="hidden" id="productsData" name="productsData">
-                    <input type="hidden" id="mesaAtual" name="productsData">
+                    {{-- <input type="hidden" id="productsData" name="productsData">
+                    <input type="hidden" id="mesaAtual" name="productsData"> --}}
 
                     <div class="search-container">
                         <input type="text" id="search-input" class="form-control" placeholder="Pesquisar produtos...">
@@ -25,8 +25,8 @@
                 </div>
                 <div class="modal-footer justify-content-between">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
-                    <div id="total-pedido">total: <span id="valor-total">0,00</span></div>
-                    <button type="submit" onclick="setPedido(event)" class="btn btn-primary">Finalizar</button>
+                    <div id="box-total-price">total: <span id="span-total-price">0,00</span></div>
+                    <button type="submit" onclick="setOrder(event)" class="btn btn-primary">Finalizar</button>
                 </div>  
             </form>
         </div>

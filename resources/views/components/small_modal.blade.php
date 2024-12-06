@@ -29,8 +29,8 @@
                 <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
                 @if ($titleModal === 'Reserva')
                 <button type="button" class="btn btn-primary" onclick="buscaCliente()">{{ $textBtn }}</button>
-                @elseif ($titleModal === 'MesaPrincipal')
-                <button type="button" class="btn btn-primary" onclick="juntarMesas()">{{ $textBtn }}</button>
+                @elseif ($titleModal === 'PrincipalTable')
+                <button type="button" class="btn btn-primary" onclick="linkedTables()">{{ $textBtn }}</button>
                 @else
                 <button type="button" class="btn btn-primary">{{ $textBtn }}</button>
                 @endif

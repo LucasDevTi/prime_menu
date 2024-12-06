@@ -20,4 +20,9 @@ class OrderItems extends Model
     {
         return $this->belongsTo(Product::class, 'product_id'); // 'product_id' é a chave estrangeira
     }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id', 'id');
+    }
 }

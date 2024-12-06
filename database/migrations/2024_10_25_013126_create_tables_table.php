@@ -15,8 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('table_number')->nullable();
             $table->foreignId('linked_table_id')->nullable()->constrained('tables')->onDelete('set null');
+            // $table->integer('linked_table_id')->default(0);
             $table->integer('status')->nullable();
             $table->string('description_status')->nullable();
+            $table->integer('user_id')->default(0);
+
             $table->timestamps();
         });
     }

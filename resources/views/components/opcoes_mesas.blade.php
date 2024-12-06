@@ -35,7 +35,7 @@
 
                 <div class="col-12 content-option" style="cursor:pointer;">
                     @if (auth()->user()->user_type && auth()->user()->user_type != 2)
-                    <div id="div-trocar-mesa" data-value="1" class="info-box bg-gradient-info btn-opcoes-mesa">
+                    <div id="box-transferred-itens" data-value="1" class="info-box bg-gradient-info btn-opcoes-mesa">
                         <i class="fa fa-arrow-left" aria-hidden="true"></i>
                         <span class="info-box-text">Transferir</span>
                         <span class="info-box-text">itens</span>

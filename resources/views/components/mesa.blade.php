@@ -13,49 +13,44 @@ if ($status == '0') {
 ?>
 
 <div class="div-tables">
-    <div class="info-box bg-gradient-{{$bgColor}} mesa"
-        data-id-mesa="{{$id}}"
-        data-status="{{$status}}"
-        onclick="acaoMesa(this)">
+    <div class="info-box bg-gradient-{{$bgColor}} table" 
+    data-idtable="{{$id}}"
+    data-status="{{$status}}"
+    @if($userid == 0 || $userid == Auth::id() || Gate::allows('view-tables'))
+    onclick="openOptionTable({{$id}})"
+    @endif
+    >
         <span class="info-box-icon">{{$id}}</i></span>
         @php
         $table_linked_id = $linked ? $linked : "0";
         @endphp
         @if($order)
-        <input type="hidden" aria-hidden="true" id="valor_mesa_{{$id}}" value = "{{$order->total_value}}_{{ $table_linked_id }}">
+        <input type="hidden" aria-hidden="true" id="total_price_{{$id}}" value = "{{$order->total_value}}_{{ $table_linked_id }}">
         @else
             @if($linked)
-            <input type="hidden" aria-hidden="true" id="valor_mesa_{{$id}}" value = "0_{{ $table_linked_id }}">
+            <input type="hidden" aria-hidden="true" id="total_price_{{$id}}" value = "0_{{ $table_linked_id }}">
             @else
-            <input type="hidden" aria-hidden="true" id="valor_mesa_{{$id}}" value = "0_{{ $table_linked_id }}">
+            <input type="hidden" aria-hidden="true" id="total_price_{{$id}}" value = "0_{{ $table_linked_id }}">
             @endif
         @endif
         <div class="info-box-content align-items-end">
             @if($linked)
-            <span class="info-box-text"><i class="fas fa-link"></i> <span class="reserve">{{$linked}}</span></span>
+            <span class="info-box-text"><i class="fas fa-link"></i> <span>{{$linked}}</span></span>
             @else
             <span class="info-box-text"><i class="fas fa-user"></i></span>
             @endif
             <span class="info-box-number">
-                @if($order)
-                {{$order->total_value}}
+                @if($linked)
+                --
+                @elseif($totalprice)
+                {{$totalprice}}
                 @else
-                    @if($linked)
-                    --
-                    @else
-                    0.00
-                    @endif
+                0.00
                 @endif
             </span>
-
-            <!-- <div class="progress">
-                          <div class="progress-bar" style="width: 70%"></div>
-                        </div> -->
             <span class="progress-description">
                 --
             </span>
         </div>
-        <!-- /.info-box-content -->
     </div>
-    <!-- /.info-box -->
 </div>

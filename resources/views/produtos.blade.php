@@ -37,7 +37,7 @@
                                 </div>
                                 <div class="d-flex justify-content-end" style="padding-right: 30px;">
                                     @if (auth()->user()->user_type == 1)
-                                    <button id="btn-reserva" type="button" class="btn btn-primary" data-toggle="modal" data-target="#cad-produtos-modal">
+                                    <button id="btn-reservation" type="button" class="btn btn-primary" data-toggle="modal" data-target="#cad-produtos-modal">
                                         Cadastrar
                                     </button>
                                     @endif

@@ -25,4 +25,5 @@ class Table extends Model
     {
         return $this->hasOne(Order::class)->where('status_payment', 1);
     }
+
 }

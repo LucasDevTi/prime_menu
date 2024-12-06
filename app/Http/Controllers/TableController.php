@@ -6,29 +6,64 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\Table;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class TableController extends Controller
 {
-    public function getStatusMesa(Request $request)
+    public function getStatusMesa(Request $request): JsonResponse
     {
-        // Valida o id da mesa
-        $mesa_id = $request->query('mesa_id');
-        // Obtém o estado da mesa
-        $mesa = Table::find($mesa_id);
 
-        // Se a mesa não for encontrada, retorna um erro
-        if (!$mesa) {
+        $validated = $request->validate([
+            'table_id' => ['required', 'integer', 'exists:tables,id']
+        ]);
+
+        if (!Auth::check()) {
+            return response()->json([
+                'status' => -1,
+                'message' => 'Você precisa estar logado para acessar essa funcionalidade.'
+            ], 403);
+        }
+
+
+        if (!Gate::allows('view-status-table', Auth::user())) {
+            return response()->json([
+                'status' => -1,
+                'message' => 'Você não tem permissão para acessar essa funcionalidade.'
+            ], 403);
+        }
+
+        $table = Table::find($validated['table_id']);
+
+        try {
+
+            $table = Table::findOrFail($validated['table_id']);
+
+            $permissions = [
+                'can_open_table' => Gate::allows('open-table-option'),
+                'can_add_item' => Gate::allows('add-item-table-option'),
+                'can_close_table' => Gate::allows('closed-table-option'),
+                'can_transferred_table' => Gate::allows('transferred-table-option'),
+                'can_pay_table' => Gate::allows('payment-table-option'),
+                'can_disabled_table' => Gate::allows('disabled-tables-option')
+            ];
+
+            return response()->json([
+                'status' => $table->status,
+                'permissions' => $permissions,
+                'message' => 'Status da mesa recuperado com sucesso'
+            ], 200);
+        } catch (ModelNotFoundException  $e) {
+
             return response()->json([
                 'status' => -1,
                 'message' => 'Mesa não encontrada'
             ], 404);
         }
-
-        return response()->json([
-            'status' => $mesa->status
-        ], 200);
     }
 
     public function atualizarStatusMesa(Request $request)
@@ -102,12 +137,12 @@ class TableController extends Controller
         }
     }
 
-    public function linkTables(Request $request)
+    public function linkedTables(Request $request)
     {
         $request->validate([
-            'mesasSelecionadas' => 'required|array',
-            'mesasSelecionadas.*' => 'exists:tables,id',  // Verifica se as mesas existem na tabela
-            'mesaPrincipal' => 'required|exists:tables,id',  // Verifica se a mesa principal existe
+            'arrayTablesSelects' => 'required|array',
+            'arrayTablesSelects.*' => 'exists:tables,id',  // Verifica se as mesas existem na tabela
+            'PrincipalTable' => 'required|exists:tables,id',  // Verifica se a mesa principal existe
         ]);
 
         DB::beginTransaction();
@@ -115,89 +150,128 @@ class TableController extends Controller
         $success = true;
         try {
 
-            $mesaPrincipal = $request->mesaPrincipal;
+            $PrincipalTable = $request->PrincipalTable;
 
-            foreach ($request->mesasSelecionadas as $table_id) {
+            foreach ($request->arrayTablesSelects as $table_id) {
 
                 $table = Table::find($table_id);
-            
-                if ($table_id != $request->mesaPrincipal) {
 
-                    $table->linked_table_id = $request->mesaPrincipal;
-                    $order = Order::where('table_id', $table_id)->first();
-            
-                    if ($order) {
-                        $orderPrincipal = Order::where('table_id', $request->mesaPrincipal)->first(); // pedido da mesa Principal.
-            
-                        if ($orderPrincipal) {
-                            
-                            $orderPrincipal->total_value += $order->total_value;
-            
-                            $orderItens = OrderItems::where('order_id', $order->id)->get();
-            
-                            if ($orderItens->isNotEmpty()) {
-                                foreach ($orderItens as $item) {
-                                    // Verifica se o item já existe na ordem principal
-                                    $existItem = OrderItems::where('order_id', $orderPrincipal->id)
-                                        ->where('product_id', $item['product_id'])
-                                        ->first();
-            
-                                    if ($existItem) {
-                                        // Atualiza o item existente
-                                        $existItem->quantity += $item->quantity;
-                                        $existItem->sub_total += $item->sub_total;
-                                        $existItem->save();
-            
-                                        // Remove o item antigo
-                                        $item->delete();
-                                    } else {
-                                        // Transfere o item para a ordem principal
-                                        $newItem = $item->replicate(); // Clona o item
-                                        $newItem->order_id = $orderPrincipal->id;
-                                        $newItem->save();
-            
-                                        // Remove o item antigo
-                                        $item->delete();
-                                    }
-                                }
-                            }
-            
-                            // Salva a ordem principal
-                            $orderPrincipal->save();
-                            // Remove a ordem antiga
-                            $order->delete();
-                        }
-                    }
+                if ($table_id != $request->PrincipalTable) {
+
+                    $table->linked_table_id = $request->PrincipalTable;
                 }
-            
-                // Atualiza o status da mesa
+
                 $table->status = 1;
                 $table->description_status = 'Aberta';
-            
+
                 if (!$table->save()) {
                     $success = false;
                     break;
                 }
             }
-            
+
             if ($success) {
                 DB::commit();
                 return response()->json([
-                    'message' => 'Status atualizado com sucesso!',
+                    'message' => 'Mesas juntadas com sucesso!',
                     'success' => true,
-                    'status' => $mesaPrincipal,
+                    'status' => $PrincipalTable,
                 ], 200);
             } else {
                 DB::rollBack();
                 return response()->json([
-                    'message' => 'Ocorreu um erro ao atualizar as mesas.',
+                    'message' => 'Ocorreu um erro ao juntas as mesas.',
                     'success' => false,
                 ], 500);
             }
-            
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Erro interno ao tentar vincular as mesas.'], 500);
+        }
+    }
+
+
+    public function closeTables(Request $request)
+    {
+        $request->validate([
+            'table_id' => 'exists:tables,id',
+        ]);
+
+        DB::beginTransaction();
+
+        $table = Table::find($request->table_id);
+        $success = true;
+
+        try {
+
+            if ($table->linked_table_id) {
+                
+                $table = Table::find($table->linked_table_id);
+                $table->status = 2;
+                $table->description_status = "Fechada";
+
+                $linked_tables = Table::where('linked_table_id', $table->id)->get();
+
+                if ($linked_tables->isNotEmpty()) {
+
+                    foreach ($linked_tables as $linked) {
+
+                        $table_parent = Table::find($linked->id);
+                        $table_parent->status = 2;
+                        $table_parent->description_status = "Fechada";
+
+                        if (!$table_parent->save()) {
+                            $success = false;
+                            break;
+                        }
+                    }
+                }
+            } else {
+
+                $linked_tables = Table::where('linked_table_id', $request->table_id)->get();
+
+                if ($linked_tables->isNotEmpty()) {
+
+                    foreach ($linked_tables as $linked) {
+
+                        $table_parent = Table::find($linked->id);
+                        $table_parent->status = 2;
+                        $table_parent->description_status = "Fechada";
+
+                        if (!$table_parent->save()) {
+                            $success = false;
+                            break;
+                        }
+                    }
+                    $table->status = 2;
+                    $table->description_status = "Fechada";
+                } else {
+                    $table->status = 2;
+                    $table->description_status = "Fechada";
+                }
+            }
+
+            if (!$table->save()) {
+                $success = false;
+            }
+
+            if ($success) {
+                DB::commit();
+                return response()->json([
+                    'message' => 'Mesa fechada com sucesso!',
+                    'success' => true,
+                    'status' => $table->status,
+                ], 200);
+            } else {
+                DB::rollBack();
+                return response()->json([
+                    'message' => 'Ocorreu um erro ao fechar as mesas.',
+                    'success' => false,
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Erro interno ao tentar fechar as mesas.'], 500);
         }
     }
 }

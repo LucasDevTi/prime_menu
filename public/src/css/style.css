@@ -1,3 +1,40 @@
+.box-waiting {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    display: none;
+}
+
+.loading-icon {
+    width: 250px;
+    height: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-icon i {
+    color: #3498db;    font-size: 8em;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .paginacaoLaravel svg {
     width: 20px !important;
 }
@@ -19,7 +56,7 @@
     align-items: center;
 }
 
-.content_legenda {
+.content_caption {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -30,36 +67,35 @@
     height: 15px;
 }
 
-.content_legenda {
+.content_caption {
     flex-wrap: wrap;
     margin-bottom: 15px;
 }
 
-.content_legenda .card-title {
+.content_caption .card-title {
     margin-left: 5px;
     margin-right: 15px;
 }
 
-.div-legenda {
+.box-caption {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: row-reverse;
 }
 
-.mesa {
+.table {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    color: white;
 }
 
-.mesa:hover {
+.table:hover {
     transform: translateY(-5px);
-    /* Move o elemento 5px para cima */
     box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
-    /* Sombra mais acentuada */
 }
 
 
-.btn-opcoes-mesa {
+.btn-table-options {
     display: flex;
     flex-direction: column;
     width: 90px;
@@ -68,7 +104,7 @@
     align-items: center;
 }
 
-.btn-opcoes-mesa i {
+.btn-table-options i {
     font-size: 30px;
 }
 
@@ -82,10 +118,11 @@
 .div-tables {
     cursor: pointer;
     margin-right: 10px;
-    width: 180px
+    width: 180px;
+    color: white;
 }
 
-.mesa-selecionada {
+.table-selected {
     border: 3px solid #FF4500;
     /* Cor de borda mais forte (laranja escuro) */
     background-color: rgba(255, 69, 0, 0.3);
@@ -101,34 +138,6 @@
 .alert-success-small-modal {
     display: none;
 }
-
-@media(max-width:690px) {
-    .div-tables {
-        width: 100px;
-    }
-
-    .info-box .info-box-icon {
-        width: 20px;
-    }
-
-    .div-products {
-        background-color: red;
-    }
-}
-
-@media(max-width:390px) {
-    .div-tables {
-        width: 80px;
-        font-size: 13px;
-    }
-
-    .info-box .info-box-icon {
-        width: 5px;
-        font-size: 25px;
-    }
-
-}
-
 
 .div-products {
     background-color: #fff;
@@ -168,7 +177,7 @@
 }
 
 .div-products h2 {
-    font-size: 1.7rem !important;
+    font-size: 1.7rem;
     margin-bottom: 0px;
 }
 
@@ -233,7 +242,7 @@
     background: #EF4342;
 }
 
-.content-qtde-transferencia > .plus-qtde{
+.content-qtde-transferencia>.plus-qtde {
     margin-bottom: 0px;
     margin-right: 2px;
 }
@@ -260,17 +269,17 @@
     display: flex;
 }
 
-#total-pedido {
+#box-total-price {
     font-weight: bolder;
     font-size: 17px;
 }
 
-#total-pedido span {
+#box-total-price span {
     color: #28a745;
     font-size: 25px;
 }
 
-.products-order-list:first{
+.products-order-list:first {
     margin-top: 15px;
 }
 
@@ -283,11 +292,38 @@
     justify-content: space-between;
 }
 
-.qtde-max-tranferencia{
+.qtde-max-tranferencia {
     width: 40px;
     padding: 2px;
 }
 
-/* .item-da-mesa{
-    width: 170px;
-} */
+@media(max-width:690px) {
+    .div-tables {
+        width: 100px;
+    }
+
+    .info-box .info-box-icon {
+        width: 20px;
+    }
+
+    /* .div-products {
+        background-color: red;
+    } */
+
+    .div-products h2{
+        font-size: 1em;
+    }
+}
+
+@media(max-width:390px) {
+    .div-tables {
+        width: 80px;
+        font-size: 13px;
+    }
+
+    .info-box .info-box-icon {
+        width: 5px;
+        font-size: 25px;
+    }
+
+}

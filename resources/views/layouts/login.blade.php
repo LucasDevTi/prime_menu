@@ -34,7 +34,7 @@
           </ul>
         </div>
         @endif
-        <form action="{{route('auth')}}" method="post">
+        <form action="{{route('authentication')}}" method="post">
           @csrf
           <div class="input-group mb-3">
             <input type="email" class="form-control" name="email" placeholder="Email">

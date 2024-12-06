@@ -86,7 +86,7 @@ async function buscaCliente() {
         }
         // }
         overlay.classList.add('d-none');
-        $('#reserva-modal').modal('hide');
+        $('#modal-reservation').modal('hide');
         $('#continua-reserva-cliente').modal('show');
 
     } catch (error) {
@@ -139,7 +139,7 @@ function disableOptionTable(table) {
     if (table) {
         table.removeAttribute('onClick');
         table.className = '';
-        table.classList.add('info-box', 'bg-gradient-secondary', 'btn-opcoes-mesa');
+        table.classList.add('info-box', 'bg-gradient-secondary', 'btn-table-options');
     }
 }
 
@@ -165,20 +165,20 @@ function enableOptionTable(table, table_id, status) {
 function setupOption(table) {
     if (table) {
         table.className = '';
-        table.classList.add('info-box', 'bg-gradient-info', 'btn-opcoes-mesa');
+        table.classList.add('info-box', 'bg-gradient-info', 'btn-table-options');
     }
 }
 
 function showModalOptionsTable(mesa_id, status) {
 
-    const mesaOcupar = document.querySelector('#div-ocupar-mesa');
+    const mesaOcupar = document.querySelector('#box-open-table');
     const mesaVincular = document.querySelector('#div-vincular-mesa');
     const mesaFechar = document.querySelector('#div-fechar-mesa');
     const mesaTrocar = document.querySelector('#div-trocar-mesa');
     const mesaPagar = document.querySelector('#div-pagar-mesa');
     const mesaInativar = document.querySelector('#div-inativar-mesa');
     const mesaAdicionarItem = document.querySelector('#div-adicionar-item-mesa');
-    const inputValorMesa = document.getElementById(`valor_mesa_${mesa_id}`);
+    const inputValorMesa = document.getElementById(`total_price_${mesa_id}`);
     let valueInputMesaValor = inputValorMesa.value.split("_");
 
     // Define padrão as classes
@@ -237,8 +237,8 @@ function showModalOptionsTable(mesa_id, status) {
 
         // Caso exista linkagem de mesa e o valor da mesa pai seja diferente de zero
         if (valueInputMesaValor[1] != "0") {
-            const mesaPrincipal = document.getElementById(`valor_mesa_${valueInputMesaValor[1]}`);
-            let valueInputMesaValorPrincipal = mesaPrincipal.value.split("_");
+            const PrincipalTable = document.getElementById(`total_price_${valueInputMesaValor[1]}`);
+            let valueInputMesaValorPrincipal = PrincipalTable.value.split("_");
 
             if (valueInputMesaValorPrincipal[0] != "0") {
                 setupOption(mesaTrocar);
@@ -297,30 +297,30 @@ function linkTables(table_id, table_id_link, showTables = true) {
     }
 }
 
-function ativarModoSelecao() {
+function enableSelectTableMode() {
     selecionandoMesas = true;
     mesasSelecionadas = []; // Limpa as mesas selecionadas
-    document.getElementById('juntarMesasBtn').innerText = "Cancelar Seleção";
-    document.getElementById('btn-juntar-mesas').style.display = 'block';
-    document.getElementById('btn-reserva').style.display = 'none';
+    document.getElementById('btn-selected-tables-linked').innerText = "Cancelar Seleção";
+    document.getElementById('btn-linked-tables').style.display = 'block';
+    document.getElementById('btn-reservation').style.display = 'none';
 
     // Troca o texto do botão para "Cancelar Seleção" e alterna ao clicar novamente
-    document.getElementById('juntarMesasBtn').onclick = desativarModoSelecao;
+    document.getElementById('btn-selected-tables-linked').onclick = desativarModoSelecao;
 }
 
 function desativarModoSelecao() {
     selecionandoMesas = false;
     mesasSelecionadas = []; // Limpa a seleção
-    document.getElementById('juntarMesasBtn').innerText = "Juntar Mesas";
-    document.getElementById('juntarMesasBtn').onclick = ativarModoSelecao;
+    document.getElementById('btn-selected-tables-linked').innerText = "Juntar Mesas";
+    document.getElementById('btn-selected-tables-linked').onclick = enableSelectTableMode;
 
-    document.getElementById('btn-juntar-mesas').style.display = 'none';
-    document.getElementById('btn-reserva').style.display = 'block';
+    document.getElementById('btn-linked-tables').style.display = 'none';
+    document.getElementById('btn-reservation').style.display = 'block';
 
     // Remove a classe de seleção de todas as mesas
-    const mesas = document.querySelectorAll('.mesa-selecionada');
+    const mesas = document.querySelectorAll('.table-selected');
     mesas.forEach(mesa => {
-        mesa.classList.remove('mesa-selecionada');
+        mesa.classList.remove('table-selected');
     });
 }
 
@@ -341,11 +341,11 @@ function selecionarMesa(mesaElemento) {
     if (mesasSelecionadas.includes(mesaId)) {
         // Se a mesa já está selecionada, removê-la da seleção
         mesasSelecionadas = mesasSelecionadas.filter(id => id !== mesaId);
-        mesaElemento.classList.remove("mesa-selecionada");
+        mesaElemento.classList.remove("table-selected");
     } else {
         // Adiciona a mesa à lista de selecionadas
         mesasSelecionadas.push(mesaId);
-        mesaElemento.classList.add("mesa-selecionada");
+        mesaElemento.classList.add("table-selected");
     }
 
     console.log("Mesas Selecionadas:", mesasSelecionadas);
@@ -360,9 +360,9 @@ async function juntarMesas() {
         return
     }
 
-    const mesaPrincipal = $('#mesa_principal').val();
+    const PrincipalTable = $('#table_principal').val();
 
-    if (mesasSelecionadas.includes(mesaPrincipal)) {
+    if (mesasSelecionadas.includes(PrincipalTable)) {
 
         resetModal();
 
@@ -377,7 +377,7 @@ async function juntarMesas() {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': token, // Inclua o token CSRF para segurança
                 },
-                body: JSON.stringify({ mesasSelecionadas: mesasSelecionadas, mesaPrincipal: mesaPrincipal })
+                body: JSON.stringify({ mesasSelecionadas: mesasSelecionadas, PrincipalTable: PrincipalTable })
             });
 
             if (!response.ok) {
@@ -467,7 +467,7 @@ function addProduct(id_produto, valor, mesa_id) {
     inputProduct.value = produto.quantidade;
 
     // Atualiza o valor total na tela
-    const spanValorTotal = document.getElementById('valor-total');
+    const spanValorTotal = document.getElementById('span-total-price');
     spanValorTotal.textContent = `R$ ${valorTotal.toFixed(2)}`;
 
     // console.log(produtos);
@@ -489,7 +489,7 @@ function rmvProduct(id_produto, valor, mesa_id) {
         inputProduct.value = produto.quantidade;
 
         // Atualiza o valor total na tela
-        const spanValorTotal = document.getElementById('valor-total');
+        const spanValorTotal = document.getElementById('span-total-price');
         spanValorTotal.textContent = `R$ ${valorTotal.toFixed(2)}`;
 
         // Se a quantidade chegar a 0, remove o produto do array
@@ -502,7 +502,7 @@ function rmvProduct(id_produto, valor, mesa_id) {
     }
 }
 
-async function setPedido(event) {
+async function setOrder(event) {
     // Impede o envio do formulário caso queira preencher o campo hidden antes
     event.preventDefault();
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -546,7 +546,7 @@ async function setPedido(event) {
 async function showItems(mesa_id) {
 
     $('#opcoes_mesa').modal('hide');
-    $('#opcoes_produtos_modal').modal('show');
+    $('#modal-products-options').modal('show');
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     produtos = [];
@@ -555,7 +555,7 @@ async function showItems(mesa_id) {
     mesaAtualTranferencia = []
     valorTotal = 0;
 
-    const spanValorTotal = document.getElementById('valor-total');
+    const spanValorTotal = document.getElementById('span-total-price');
     spanValorTotal.textContent = `R$ ${valorTotal.toFixed(2)}`;
 
     try {
@@ -624,9 +624,9 @@ async function changeTable(table_id) {
     valorTotal = 0;
 
     $('#opcoes_mesa').modal('hide');
-    $('#modal-transferencia-itens').modal('show');
+    $('#modal-transferred-itens').modal('show');
 
-    const selectMesas = document.getElementById('mesas-disponiveis-transferencia');
+    const selectMesas = document.getElementById('tables-availables-transferred');
     selectMesas.innerHTML = '<option selected value="0">Selecione</option>';
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -745,16 +745,16 @@ function rmvProductTransferencia(id_produto, quantidade, mesa_id) {
 
 
 
-async function transferir(event) {
+async function transferredItens(event) {
 
     event.preventDefault();
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const produtosJson = JSON.stringify(produtosTransferencia);
-    const radios = document.getElementsByName('opcao-transferencia');
+    const radios = document.getElementsByName('transferred-option');
     let opcao = 0;
     console.log(produtosJson)
     console.log(mesaAtualTranferencia);
-    const mesaTransferir = document.getElementById('mesas-disponiveis-transferencia');
+    const mesaTransferir = document.getElementById('tables-availables-transferred');
     for (let radio of radios) { 
         if (radio.checked) {
             opcao = radio.value;
@@ -768,7 +768,7 @@ async function transferir(event) {
 return
     if (parseInt(opcao) != 0 && parseInt(mesaTransferir.value) != 0) {
         try {
-            const response = await fetch('/set-transferencia', {
+            const response = await fetch('/set-transferred', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
