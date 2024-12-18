@@ -24,6 +24,7 @@ class OrderController extends Controller
             'table_id' => 'required|exists:tables,id'
         ]);
 
+
         $products = json_decode($request->input('productsData'), true);
 
         $table = Table::find($request->table_id);
@@ -51,7 +52,7 @@ class OrderController extends Controller
                                     ->where('product_id', $product['id'])
                                     ->first();
 
-                                if ($orderItemRepeat) {
+                                if ($orderItemRepeat && $product['quantity'] > 0) {
 
                                     $orderItemRepeat->quantity += $product['quantity'];
                                     $orderItemRepeat->price = $item['price'];
@@ -64,18 +65,21 @@ class OrderController extends Controller
                                 } else {
 
                                     $orderItem = new OrderItems();
-                                    $orderItem->quantity = $product['quantity'];
-                                    $orderItem->order_id = $order->id;
-                                    $orderItem->product_id = $product['id'];
-                                    $orderItem->product_name = $item['name'];
 
-                                    $orderItem->price = $item['price'];
-                                    $orderItem->sub_total = $item['price'] * $product['quantity'];
-                                    $orderItem->table_id = $request->table_id;
+                                    if ($product['quantity'] > 0) {
+                                        $orderItem->quantity = $product['quantity'];
+                                        $orderItem->order_id = $order->id;
+                                        $orderItem->product_id = $product['id'];
+                                        $orderItem->product_name = $item['name'];
 
-                                    if (!$orderItem->save()) {
-                                        $success = false;
-                                        break;
+                                        $orderItem->price = $item['price'];
+                                        $orderItem->sub_total = $item['price'] * $product['quantity'];
+                                        $orderItem->table_id = $request->table_id;
+
+                                        if (!$orderItem->save()) {
+                                            $success = false;
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -97,19 +101,22 @@ class OrderController extends Controller
                                 if ($item) {
 
                                     $orderItem = new OrderItems();
-                                    $orderItem->quantity = $product['quantity'];
-                                    $orderItem->order_id = $order->id;
-                                    $orderItem->product_id = $product['id'];
 
-                                    $orderItem->product_name = $item['name'];
+                                    if ($product['quantity'] > 0) {
+                                        $orderItem->quantity = $product['quantity'];
+                                        $orderItem->order_id = $order->id;
+                                        $orderItem->product_id = $product['id'];
 
-                                    $orderItem->price = $item['price'];
-                                    $orderItem->sub_total = $item['price'] * $product['quantity'];
-                                    $orderItem->table_id = $request->table_id;
+                                        $orderItem->product_name = $item['name'];
 
-                                    if (!$orderItem->save()) {
-                                        $success = false;
-                                        break;
+                                        $orderItem->price = $item['price'];
+                                        $orderItem->sub_total = $item['price'] * $product['quantity'];
+                                        $orderItem->table_id = $request->table_id;
+
+                                        if (!$orderItem->save()) {
+                                            $success = false;
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -239,7 +246,6 @@ class OrderController extends Controller
 
     public function changeTable(Request $request)
     {
-
         $request->validate([
             'table_id' => 'required|exists:tables,id',
             'tableToTransferred' => 'required|exists:tables,id'
@@ -248,11 +254,11 @@ class OrderController extends Controller
         $products = json_decode($request->input('productsData'), true);
 
         $order = Order::where('table_id', $request->table_id)->where('status_payment', 1)->first();
+
         if (!empty($products)) {
 
             DB::beginTransaction();
             $success = true;
-
             try {
                 if ($order) {
 
@@ -300,7 +306,7 @@ class OrderController extends Controller
 
                                                     $totalSubPrice = OrderItems::where('order_id', $order->id)->sum('sub_total');
 
-                                                    $order->sub_price = $totalSubPrice;
+                                                    $order->total_value = $totalSubPrice;
 
                                                     if (!$order->save()) {
                                                         $success = false;
@@ -314,7 +320,7 @@ class OrderController extends Controller
 
                                                     $totalSubPrice = OrderItems::where('order_id', $orderTransferred->id)->sum('sub_total');
 
-                                                    $orderTransferred->sub_price = $totalSubPrice;
+                                                    $orderTransferred->total_value = $totalSubPrice;
 
                                                     if (!$orderTransferred->save()) {
                                                         $success = false;
@@ -360,7 +366,7 @@ class OrderController extends Controller
 
                                                     $totalSubPrice = OrderItems::where('order_id', $order->id)->sum('sub_total');
 
-                                                    $order->sub_price = $totalSubPrice;
+                                                    $order->total_value = $totalSubPrice;
 
                                                     if (!$order->save()) {
                                                         $success = false;
@@ -375,7 +381,7 @@ class OrderController extends Controller
 
                                                 $totalSubPrice = OrderItems::where('order_id', $orderTransferred->id)->sum('sub_total');
 
-                                                $orderTransferred->sub_price = $totalSubPrice;
+                                                $orderTransferred->total_value = $totalSubPrice;
 
                                                 if (!$orderTransferred->save()) {
                                                     $success = false;
@@ -385,31 +391,21 @@ class OrderController extends Controller
                                         }
                                     }
                                 } else {
+
                                     $orderTransferred = Order::where('table_id', $request->tableToTransferred)->where('status_payment', 2)->first();
 
                                     if (!$orderTransferred) {
 
-                                        $newOrder = new Order();
-                                        $newOrder->table_id = $request->tableToTransferred;
-                                        $newOrder->status_payment = 1;
-                                        $newOrder->description_status = "Aberto";
-                                        $newOrder->user_id = Auth::id(); // trocar depois a logica disso aqui, somente garçom chefe e admin podem decidir qual garçom vai abrir a mesa
+                                        $returnNewOrder = $this->createNewOrder($request->tableToTransferred);
 
-                                        if (!$newOrder->save()) {
+                                        if (!$returnNewOrder['success']) {
                                             $success = false;
                                             break;
                                         }
 
-                                        $newOrderItem = new OrderItems();
-                                        $newOrderItem->order_id = $newOrder->id;
-                                        $productModel = Product::find($product['id']);
-                                        $newOrderItem->product_name = $productModel ? $productModel->name : null;
-                                        $newOrderItem->quantity = $product['quantity'];
-                                        $newOrderItem->price = $productModel->price;
-                                        $newOrderItem->sub_total =  $productModel->price * $product['quantity'];
-                                        $newOrderItem->table_id = $request->tableToTransferred;
+                                        $createNewOrder = $this->createNewOrderItem($returnNewOrder['newOrderId'], $product['id'], $product['quantity'], $request->tableToTransferred);
 
-                                        if (!$newOrderItem->save()) {
+                                        if (!$createNewOrder) {
                                             $success = false;
                                             break;
                                         }
@@ -426,33 +422,19 @@ class OrderController extends Controller
 
                                             $orderItem->delete();
 
-                                            if (OrderItems::where('order_id', $order->id)->exists()) {
+                                            $returnCalculate = $this->calculateTotalPrice($order->id);
 
-                                                $totalSubPrice = OrderItems::where('order_id', $order->id)->sum('sub_total');
-
-                                                $order->sub_price = $totalSubPrice;
-
-                                                if (!$order->save()) {
-                                                    $success = false;
-                                                    break;
-                                                }
-                                            } else {
-                                                $order->delete();
+                                            if (!$returnCalculate) {
+                                                $success = false;
+                                                break;
                                             }
+                                        }
 
-                                            if (OrderItems::where('order_id', $newOrder->id)->exists()) {
+                                        $returnCalculate = $this->calculateTotalPrice($returnNewOrder['newOrderId']);
 
-                                                $totalSubPrice = OrderItems::where('order_id', $newOrder->id)->sum('sub_total');
-
-                                                $newOrder->sub_price = $totalSubPrice;
-
-                                                if (!$newOrder->save()) {
-                                                    $success = false;
-                                                    break;
-                                                }
-                                            } else {
-                                                // $orderTransferred->delete();
-                                            }
+                                        if (!$returnCalculate) {
+                                            $success = false;
+                                            break;
                                         }
                                     }
                                 }
@@ -462,6 +444,15 @@ class OrderController extends Controller
                                 'message' => 'Nenhum item de pedido encontrado',
                                 'success' => false,
                             ], 404);
+                        }
+                    }
+
+                    if ($success) {
+                        $tableToTransf->status = 1;
+                        $tableToTransf->description_status = "Aberta";
+
+                        if (!$tableToTransf->save()) {
+                            $success = false;
                         }
                     }
 
@@ -481,6 +472,7 @@ class OrderController extends Controller
                     ], 404);
                 }
             } catch (\Exception $e) {
+                dd($e);
                 DB::rollBack();
                 return response()->json(['error' => 'Erro interno ao tentar realizar o pedido.'], 500);
             }
@@ -490,5 +482,73 @@ class OrderController extends Controller
             'message' => 'Nenhum produto foi encontrado.',
             'success' => false
         ], 404);
+    }
+
+    private function createNewOrder($table_id)
+    {
+        $newOrder = new Order();
+        $newOrder->table_id = $table_id;
+        $newOrder->status_payment = 1;
+        $newOrder->description_status = "Aberto";
+        $newOrder->user_id = Auth::id(); // trocar depois a logica disso aqui, somente garçom chefe e admin podem decidir qual garçom vai abrir a mesa
+
+        if ($newOrder->save()) {
+            return array(
+                'success' => true,
+                'newOrderId' => $newOrder->id
+            );
+        }
+
+        return array(
+            'success' => false,
+        );
+    }
+
+    private function createNewOrderItem($order_id, $product_id, $quantity, $table_id)
+    {
+        $newOrderItem = new OrderItems();
+        $productModel = Product::find($product_id);
+
+        if ($productModel) {
+            $newOrderItem->order_id = $order_id;
+            $newOrderItem->product_id = $product_id;
+            $newOrderItem->product_name = $productModel ? $productModel->name : null;
+            $newOrderItem->quantity = $quantity;
+            $newOrderItem->price = $productModel->price;
+            $newOrderItem->sub_total =  $productModel->price * $quantity;
+            $newOrderItem->table_id = $table_id;
+
+            if ($newOrderItem->save()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function calculateTotalPrice($order_id)
+    {
+        $order = Order::find($order_id);
+
+        if ($order) {
+            if (OrderItems::where('order_id', $order_id)->exists()) {
+                $totalSubPrice = OrderItems::where('order_id', $order_id)->sum('sub_total');
+
+                $order->total_value = $totalSubPrice;
+
+                if ($order->save()) {
+                    return true;
+                }
+            } else {
+
+                $table = Table::where('linked_table_id', $order->table_id)->get();
+
+                if ($table->isEmpty()) {
+                    $order->delete();
+                }
+                return true;
+            }
+            return false;
+        }
     }
 }

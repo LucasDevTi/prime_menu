@@ -205,7 +205,7 @@ class TableController extends Controller
         try {
 
             if ($table->linked_table_id) {
-                
+
                 $table = Table::find($table->linked_table_id);
                 $table->status = 2;
                 $table->description_status = "Fechada";
@@ -272,6 +272,40 @@ class TableController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Erro interno ao tentar fechar as mesas.'], 500);
+        }
+    }
+
+    public function releaseTable($table_id)
+    {
+        $order = Order::whereIn('status_payment', [1, 2])
+            ->where('table_id', $table_id)
+            ->first();
+
+        if (!$order) {
+
+            $table = Table::find($table_id);
+
+            if ($table) {
+                $table->status = 0;
+                $table->description_status = "Liberada";
+                if ($table->save()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public function updateToOpen($table_id)
+    {
+        $table = Table::find($table_id);
+
+        if ($table) {
+            $table->status = 1;
+            $table->description_status = "Aberta";
+            if ($table->save()) {
+                return true;
+            }
         }
     }
 }
