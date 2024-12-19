@@ -159,6 +159,7 @@ class TableController extends Controller
                 if ($table_id != $request->PrincipalTable) {
 
                     $table->linked_table_id = $request->PrincipalTable;
+                    $table->user_id = Auth::id();
                 }
 
                 $table->status = 1;

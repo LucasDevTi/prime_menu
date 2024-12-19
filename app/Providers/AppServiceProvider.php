@@ -29,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('add-item-table-option', function ($user) {
-            return in_array($user->user_type, [1, 3, 4]);
+            return in_array($user->user_type, [1, 2, 3, 4]);
         });
 
         Gate::define('closed-table-option', function ($user) {

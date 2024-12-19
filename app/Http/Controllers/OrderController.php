@@ -52,11 +52,12 @@ class OrderController extends Controller
                                     ->where('product_id', $product['id'])
                                     ->first();
 
-                                if ($orderItemRepeat && $product['quantity'] > 0) {
+                                if ($orderItemRepeat && $product['quantity'] > 0 && ($orderItemRepeat->user_id == Auth::id())) {
 
                                     $orderItemRepeat->quantity += $product['quantity'];
                                     $orderItemRepeat->price = $item['price'];
                                     $orderItemRepeat->sub_total += ($item['price'] * $product['quantity']);
+                                    $orderItemRepeat->user_id = Auth::id();
 
                                     if (!$orderItemRepeat->save()) {
                                         $success = false;
@@ -75,6 +76,7 @@ class OrderController extends Controller
                                         $orderItem->price = $item['price'];
                                         $orderItem->sub_total = $item['price'] * $product['quantity'];
                                         $orderItem->table_id = $request->table_id;
+                                        $orderItem->user_id = Auth::id();
 
                                         if (!$orderItem->save()) {
                                             $success = false;
@@ -112,6 +114,7 @@ class OrderController extends Controller
                                         $orderItem->price = $item['price'];
                                         $orderItem->sub_total = $item['price'] * $product['quantity'];
                                         $orderItem->table_id = $request->table_id;
+                                        $orderItem->user_id = Auth::id();
 
                                         if (!$orderItem->save()) {
                                             $success = false;
@@ -254,6 +257,7 @@ class OrderController extends Controller
         $products = json_decode($request->input('productsData'), true);
 
         $order = Order::where('table_id', $request->table_id)->where('status_payment', 1)->first();
+        $table_parent = Table::find($request->table_id);
 
         if (!empty($products)) {
 
@@ -271,6 +275,13 @@ class OrderController extends Controller
                             $tableToTransf = Table::find($request->tableToTransferred);
 
                             if ($tableToTransf && ($tableToTransf->status == 0 || $tableToTransf->status == 1)) {
+
+                                if ($tableToTransf->status == 0) {
+                                    $tableToTransf->user_id = $table_parent->user_id;
+                                    $user_id = $table_parent->user_id;
+                                } else if ($tableToTransf->status == 1) {
+                                    $user_id = $tableToTransf->user_id;
+                                }
 
                                 $orderTransferred = Order::where('table_id', $request->tableToTransferred)->where('status_payment', 1)->first();
 
@@ -396,14 +407,14 @@ class OrderController extends Controller
 
                                     if (!$orderTransferred) {
 
-                                        $returnNewOrder = $this->createNewOrder($request->tableToTransferred);
+                                        $returnNewOrder = $this->createNewOrder($request->tableToTransferred, $user_id);
 
                                         if (!$returnNewOrder['success']) {
                                             $success = false;
                                             break;
                                         }
 
-                                        $createNewOrder = $this->createNewOrderItem($returnNewOrder['newOrderId'], $product['id'], $product['quantity'], $request->tableToTransferred);
+                                        $createNewOrder = $this->createNewOrderItem($returnNewOrder['newOrderId'], $product['id'], $product['quantity'], $request->tableToTransferred, $user_id);
 
                                         if (!$createNewOrder) {
                                             $success = false;
@@ -484,13 +495,13 @@ class OrderController extends Controller
         ], 404);
     }
 
-    private function createNewOrder($table_id)
+    private function createNewOrder($table_id, $user_id)
     {
         $newOrder = new Order();
         $newOrder->table_id = $table_id;
         $newOrder->status_payment = 1;
         $newOrder->description_status = "Aberto";
-        $newOrder->user_id = Auth::id(); // trocar depois a logica disso aqui, somente garçom chefe e admin podem decidir qual garçom vai abrir a mesa
+        $newOrder->user_id = $user_id; // trocar depois a logica disso aqui, somente garçom chefe e admin podem decidir qual garçom vai abrir a mesa
 
         if ($newOrder->save()) {
             return array(
@@ -504,7 +515,7 @@ class OrderController extends Controller
         );
     }
 
-    private function createNewOrderItem($order_id, $product_id, $quantity, $table_id)
+    private function createNewOrderItem($order_id, $product_id, $quantity, $table_id, $user_id)
     {
         $newOrderItem = new OrderItems();
         $productModel = Product::find($product_id);
@@ -517,6 +528,7 @@ class OrderController extends Controller
             $newOrderItem->price = $productModel->price;
             $newOrderItem->sub_total =  $productModel->price * $quantity;
             $newOrderItem->table_id = $table_id;
+            $newOrderItem->user_id = $user_id;
 
             if ($newOrderItem->save()) {
                 return true;
