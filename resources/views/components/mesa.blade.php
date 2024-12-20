@@ -16,7 +16,7 @@ if ($status == '0') {
     <div class="info-box bg-gradient-{{$bgColor}} table" 
     data-idtable="{{$id}}"
     data-status="{{$status}}"
-    @if($userid == 0 || $userid == Auth::id() || Gate::allows('view-tables'))
+    @if(Gate::allows('view-tables'))
     onclick="openOptionTable({{$id}})"
     @endif
     >

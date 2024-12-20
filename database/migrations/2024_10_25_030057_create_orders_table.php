@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('status_payment')->nullable();
             $table->string('description_status')->nullable();
             $table->float('total_value', 10, 2)->nullable()->default(0.00);
-            $table->foreignId('user_id')->nullable()->constrained('users')->default(0)->onDelete('cascade');
+            // $table->foreignId('user_id')->nullable()->constrained('users')->default(0)->onDelete('cascade');
             $table->timestamps();
         });
     }

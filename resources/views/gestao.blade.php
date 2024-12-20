@@ -64,7 +64,7 @@
                 @if ($tables)
                 <div class="row">
                   @foreach ($tables as $table)
-                  <x-mesa :id="$table->id" :status="$table->status" :linked="$table->linked_table_id" :order="$table->openOrder" :userid="$table->user_id" :totalprice="$table->totalPrice" />
+                  <x-mesa :id="$table->id" :status="$table->status" :linked="$table->linked_table_id" :order="$table->openOrder" :totalprice="$table->totalPrice" />
                   @endforeach
                 </div>
                 @endif

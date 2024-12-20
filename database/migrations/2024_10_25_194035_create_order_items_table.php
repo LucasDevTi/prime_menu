@@ -20,7 +20,7 @@ return new class extends Migration
             $table->float('price', 10, 2)->nullable()->default(0.00);
             $table->float('sub_total')->nullable();
             $table->foreignId('table_id')->nullable()->constrained('tables')->default(0)->onDelete('cascade');
-            $table->integer('user_id')->nullable()->constrained('users')->default(0)->onDelete('cascade');;
+            // $table->integer('user_id')->nullable()->constrained('users')->default(0)->onDelete('cascade');;
 
             $table->timestamps();
         });
