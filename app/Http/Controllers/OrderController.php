@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\Product;
 use App\Models\Table;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,13 @@ use Illuminate\Support\Facades\Gate;
 
 class OrderController extends Controller
 {
+    private $orderService;
+
+    public function __construct(OrderService $orderService)
+    {
+        $this->orderService = $orderService;
+    }
+
     public function setOrder(Request $request)
     {
         if (!Auth::check()) {
@@ -21,7 +29,8 @@ class OrderController extends Controller
         }
 
         $request->validate([
-            'table_id' => 'required|exists:tables,id'
+            'table_id' => 'required|exists:tables,id',
+            'productsData' => 'required|json'
         ]);
 
 
@@ -30,143 +39,25 @@ class OrderController extends Controller
         $table = Table::find($request->table_id);
 
         if (Gate::allows('view-tables')) {
+            try {
 
-            if (!empty($products)) {
+                $order = $this->orderService->handleOrder($request->table_id, $products);
 
-                DB::beginTransaction();
-
-                $success = true;
-
-                try {
-
-                    $order = Order::where('table_id', $request->table_id)->first();
-
-                    if ($order) {
-                        foreach ($products as $product) {
-
-                            $item = Product::find($product['id']);
-
-                            if ($item) {
-
-                                $orderItemRepeat = OrderItems::where('table_id', $request->table_id)
-                                    ->where('product_id', $product['id'])
-                                    ->first();
-
-                                if ($orderItemRepeat && $product['quantity'] > 0) {
-
-                                    $orderItemRepeat->quantity += $product['quantity'];
-                                    $orderItemRepeat->price = $item['price'];
-                                    $orderItemRepeat->sub_total += ($item['price'] * $product['quantity']);
-
-                                    if (!$orderItemRepeat->save()) {
-                                        $success = false;
-                                        break;
-                                    }
-                                } else {
-
-                                    $orderItem = new OrderItems();
-
-                                    if ($product['quantity'] > 0) {
-                                        $orderItem->quantity = $product['quantity'];
-                                        $orderItem->order_id = $order->id;
-                                        $orderItem->product_id = $product['id'];
-                                        $orderItem->product_name = $item['name'];
-
-                                        $orderItem->price = $item['price'];
-                                        $orderItem->sub_total = $item['price'] * $product['quantity'];
-                                        $orderItem->table_id = $request->table_id;
-
-                                        if (!$orderItem->save()) {
-                                            $success = false;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-
-                        $order = new Order();
-
-                        $order->table_id = $request->table_id;
-                        $order->status_payment = 1;
-                        $order->description_status = "Aberto";
-
-                        if ($order->save()) {
-
-                            foreach ($products as $product) {
-
-                                $item = Product::find($product['id']);
-
-                                if ($item) {
-
-                                    $orderItem = new OrderItems();
-
-                                    if ($product['quantity'] > 0) {
-                                        $orderItem->quantity = $product['quantity'];
-                                        $orderItem->order_id = $order->id;
-                                        $orderItem->product_id = $product['id'];
-
-                                        $orderItem->product_name = $item['name'];
-
-                                        $orderItem->price = $item['price'];
-                                        $orderItem->sub_total = $item['price'] * $product['quantity'];
-                                        $orderItem->table_id = $request->table_id;
-
-                                        if (!$orderItem->save()) {
-                                            $success = false;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if ($success) {
-                        if ($table->status == 0) {
-
-                            $table->status = 1;
-                            $table->description_status = "Aberta";
-                            $table->save();
-                        }
-
-                        // Mudar de posição
-                        $orderToUpdate = Order::find($order->id);
-                        $totalSubPrice = OrderItems::where('order_id', $order->id)->sum('sub_total');
-                        $orderToUpdate->total_value = $totalSubPrice;
-
-                        if (!$orderToUpdate->save()) {
-                            $success = false;
-                        }
-
-                        DB::commit();
-
-                        return response()->json([
-                            'message' => 'Pedido realizado com sucesso!',
-                            'success' => true,
-                            'status' => ''
-                        ], 200);
-                    } else {
-                        DB::rollBack();
-                        return response()->json([
-                            'message' => 'Ocorreu um erro ao realizar o pedido.',
-                            'success' => false
-                        ], 500);
-                    }
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    return response()->json(['error' => 'Erro interno ao tentar realizar o pedido.'], 500);
+                $table = Table::find($request->table_id);
+                if ($table->status === 0) {
+                    $table->status = 1;
+                    $table->description_status = "Aberta";
+                    $table->save();
                 }
-            }
 
-            return response()->json([
-                'message' => 'Nenhum produto foi encontrado.',
-                'success' => false
-            ], 404);
+                return response()->json(['success' => true, 'message' => 'Pedido realizado com sucesso!'], 200);
+            } catch (\Exception $e) {
+                return response()->json(['success' => false, 'error' => 'Erro ao processar o pedido.'], 500);
+            }
         }
 
         return response()->json([
+            'success' => false,
             'message' => 'Você não tem autorização para editar essa mesa.',
             'success' => false
         ], 401);
