@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('comissions_user', function (Blueprint $table) {
+        Schema::create('comissions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_item')->nullable()->constrained('order_items')->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');

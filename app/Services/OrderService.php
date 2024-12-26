@@ -16,28 +16,30 @@ class OrderService
 
         try {
             $order = Order::firstOrCreate(
-                ['table_id' => $tableId, 'status_payment' => 1],
+                ['table_id' => $tableId],
+                ['status_payment' => 1],
                 ['description_status' => 'Aberto']
             );
-
+            
             foreach ($products as $product) {
-                $OrderItemId = $this->addItemToOrder($order, $product);
+                $OrderItemId = $this->addItemToOrder($order, $product, $tableId);
                 $this->addItemToComission($OrderItemId, Auth::id());
             }
 
             $order->total_value = OrderItems::where('order_id', $order->id)->sum('sub_total');
+            $order->table_id = $tableId;
             $order->save();
 
             DB::commit();
             return $order;
         } catch (\Exception $e) {
-
+            // dd($e);
             DB::rollBack();
             throw $e;
         }
     }
 
-    private function addItemToOrder(Order $order, $product)
+    private function addItemToOrder(Order $order, $product, $tableId)
     {
         $orderItem = OrderItems::firstOrNew([
             'order_id' => $order->id,
@@ -46,6 +48,7 @@ class OrderService
 
         $orderItem->quantity += $product['quantity'];
         $orderItem->sub_total = $orderItem->quantity * $product['price'];
+        $orderItem->table_id += $tableId;
 
         $orderItem->save();
 
@@ -55,14 +58,12 @@ class OrderService
     private function addItemToComission($orderItemId, $userId)
     {
         $orderItem = OrderItems::find($orderItemId);
-
         if ($orderItem) {
-
+            
             $comission = Comission::firstOrNew([
-                'order_id' => $orderItemId,
-                'user_id' => $userId
+                'order_item' => $orderItemId,
+                'user_id' => $userId,
             ]);
-
             $comission->quantity = $orderItem->quantity;
             $comission->save();
         }

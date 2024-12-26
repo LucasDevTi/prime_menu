@@ -39,10 +39,10 @@ class OrderController extends Controller
         $table = Table::find($request->table_id);
 
         if (Gate::allows('view-tables')) {
+
             try {
 
                 $order = $this->orderService->handleOrder($request->table_id, $products);
-
                 $table = Table::find($request->table_id);
                 if ($table->status === 0) {
                     $table->status = 1;
