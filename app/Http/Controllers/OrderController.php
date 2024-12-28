@@ -205,6 +205,21 @@ class OrderController extends Controller
         $this->updateOrderTotals($orderTransferred);
 
         $this->updateTable($tableToTransferred, 1, 'Aberta');
+
+        $this->verifyOrderTable($order->id);
+    }
+
+    private function verifyOrderTable($orderId)
+    {
+        $orderHasItems  = OrderItems::where('order_id', $orderId)->exists();
+
+        if (!$orderHasItems) {
+            $order = Order::find($orderId);
+            if ($order) {
+                $this->updateTable($order->table_id, 0, 'Liberada');
+                $order->delete();
+            }
+        }
     }
 
     private function updateOrderItems($orderItem, $product, $orderTransferred)
@@ -219,7 +234,6 @@ class OrderController extends Controller
             $orderItemTransf->save();
 
             $this->updateComission($orderItemTransf->id, $product['quantity'], 'add');
-
         } else {
             $name = Product::find($product['id'])->name;
 
