@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Comission;
 use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\Product;
@@ -59,7 +60,6 @@ class OrderController extends Controller
         return response()->json([
             'success' => false,
             'message' => 'Você não tem autorização para editar essa mesa.',
-            'success' => false
         ], 401);
     }
 
@@ -132,7 +132,6 @@ class OrderController extends Controller
         ], 400);
     }
 
-
     public function changeTable(Request $request)
     {
         $request->validate([
@@ -142,302 +141,161 @@ class OrderController extends Controller
 
         $products = json_decode($request->input('productsData'), true);
 
+
+        if (empty($products)) {
+            return response()->json([
+                'message' => 'Nenhum produto foi encontrado.',
+                'success' => false
+            ], 404);
+        }
+
         $order = Order::where('table_id', $request->table_id)->where('status_payment', 1)->first();
-        $table_parent = Table::find($request->table_id);
 
-        if (!empty($products)) {
-
-            DB::beginTransaction();
-            $success = true;
-            try {
-                if ($order) {
-
-                    foreach ($products as $product) {
-
-                        $orderItem = OrderItems::where('order_id', $order->id)->where('product_id', $product['id'])->first();
-
-                        if ($orderItem) {
-
-                            $tableToTransf = Table::find($request->tableToTransferred);
-
-                            if ($tableToTransf && ($tableToTransf->status == 0 || $tableToTransf->status == 1)) {
-
-                                $orderTransferred = Order::where('table_id', $request->tableToTransferred)->where('status_payment', 1)->first();
-
-                                if ($orderTransferred) {
-
-                                    $orderItemTransf = OrderItems::where('order_id', $orderTransferred->id)->where('product_id', $product['id'])->first();
-
-                                    if ($orderItemTransf) {  // se achou esse item para a mesa que sera transferido
-
-                                        if ($orderItem->quantity <= $product['quantity']) {
-
-                                            $orderItemTransf->quantity += $product['quantity'];
-                                            $orderItemTransf->sub_total = $orderItemTransf->price * $orderItemTransf->quantity;
-
-                                            if (!$orderItemTransf->save()) {
-                                                $success = false;
-                                                break;
-                                            }
-
-                                            $orderItem->quantity -= $product['quantity'];
-                                            $orderItem->sub_total = $orderItem->price * $orderItem->quantity;
-
-                                            if (!$orderItem->save()) {
-                                                $success = false;
-                                                break;
-                                            }
-
-                                            if ($orderItem->quantity == 0) {
-
-                                                $orderItem->delete();
-
-                                                if (OrderItems::where('order_id', $order->id)->exists()) {
-
-                                                    $totalSubPrice = OrderItems::where('order_id', $order->id)->sum('sub_total');
-
-                                                    $order->total_value = $totalSubPrice;
-
-                                                    if (!$order->save()) {
-                                                        $success = false;
-                                                        break;
-                                                    }
-                                                } else {
-                                                    $order->delete();
-                                                }
-
-                                                if (OrderItems::where('order_id', $orderTransferred->id)->exists()) {
-
-                                                    $totalSubPrice = OrderItems::where('order_id', $orderTransferred->id)->sum('sub_total');
-
-                                                    $orderTransferred->total_value = $totalSubPrice;
-
-                                                    if (!$orderTransferred->save()) {
-                                                        $success = false;
-                                                        break;
-                                                    }
-                                                } else {
-                                                    // $orderTransferred->delete();
-                                                }
-                                            }
-                                        }
-                                    } else {
-
-                                        if ($product['quantity'] <= $orderItem->quantity) {
-                                            $orderItemTransf = new OrderItems();
-
-                                            $orderItemTransf->order_id = $orderTransferred->id;
-                                            $orderItemTransf->product_id = $product['id'];
-
-                                            $productModel = Product::find($product['id']);
-                                            $orderItemTransf->product_name = $productModel ? $productModel->name : null;
-                                            $orderItemTransf->quantity = $product['quantity'];
-                                            $orderItemTransf->price = $productModel ? $productModel->price : null;
-                                            $orderItemTransf->sub_total = $productModel->price * $product['quantity'];
-                                            $orderItemTransf->table_id = $request->tableToTransferred;
-
-                                            if (!$orderItemTransf->save()) {
-                                                $success = false;
-                                                break;
-                                            }
-
-                                            $orderItem->quantity -= $product['quantity'];
-                                            $orderItem->sub_total = $orderItem->price * $orderItem->quantity;
-
-                                            if (!$orderItem->save()) {
-                                                $success = false;
-                                                break;
-                                            }
-
-                                            if ($orderItem->quantity == 0) {
-                                                $orderItem->delete();
-
-                                                if (OrderItems::where('order_id', $order->id)->exists()) {
-
-                                                    $totalSubPrice = OrderItems::where('order_id', $order->id)->sum('sub_total');
-
-                                                    $order->total_value = $totalSubPrice;
-
-                                                    if (!$order->save()) {
-                                                        $success = false;
-                                                        break;
-                                                    }
-                                                } else {
-                                                    $order->delete();
-                                                }
-                                            }
-
-                                            if (OrderItems::where('order_id', $orderTransferred->id)->exists()) {
-
-                                                $totalSubPrice = OrderItems::where('order_id', $orderTransferred->id)->sum('sub_total');
-
-                                                $orderTransferred->total_value = $totalSubPrice;
-
-                                                if (!$orderTransferred->save()) {
-                                                    $success = false;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                } else {
-
-                                    $orderTransferred = Order::where('table_id', $request->tableToTransferred)->where('status_payment', 2)->first();
-
-                                    if (!$orderTransferred) {
-
-                                        $returnNewOrder = $this->createNewOrder($request->tableToTransferred);
-
-                                        if (!$returnNewOrder['success']) {
-                                            $success = false;
-                                            break;
-                                        }
-
-                                        $createNewOrder = $this->createNewOrderItem($returnNewOrder['newOrderId'], $product['id'], $product['quantity'], $request->tableToTransferred);
-
-                                        if (!$createNewOrder) {
-                                            $success = false;
-                                            break;
-                                        }
-
-                                        $orderItem->quantity -= $product['quantity'];
-                                        $orderItem->sub_total = $orderItem->price * $orderItem->quantity;
-
-                                        if (!$orderItem->save()) {
-                                            $success = false;
-                                            break;
-                                        }
-
-                                        if ($orderItem->quantity == 0) {
-
-                                            $orderItem->delete();
-
-                                            $returnCalculate = $this->calculateTotalPrice($order->id);
-
-                                            if (!$returnCalculate) {
-                                                $success = false;
-                                                break;
-                                            }
-                                        }
-
-                                        $returnCalculate = $this->calculateTotalPrice($returnNewOrder['newOrderId']);
-
-                                        if (!$returnCalculate) {
-                                            $success = false;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            return response()->json([
-                                'message' => 'Nenhum item de pedido encontrado',
-                                'success' => false,
-                            ], 404);
-                        }
-                    }
-
-                    if ($success) {
-                        $tableToTransf->status = 1;
-                        $tableToTransf->description_status = "Aberta";
-
-                        if (!$tableToTransf->save()) {
-                            $success = false;
-                        }
-                    }
-
-                    if ($success) {
-
-                        DB::commit();
-
-                        return response()->json([
-                            'message' => 'Itens tranferidos com sucesso!',
-                            'success' => true,
-                        ], 200);
-                    }
-                } else {
-                    return response()->json([
-                        'message' => 'Nenhum Pedido encontrado',
-                        'success' => false,
-                    ], 404);
-                }
-            } catch (\Exception $e) {
-                dd($e);
-                DB::rollBack();
-                return response()->json(['error' => 'Erro interno ao tentar realizar o pedido.'], 500);
-            }
+        if (!$order) {
+            return response()->json([
+                'message' => 'Nenhum Pedido encontrado',
+                'success' => false,
+            ], 404);
         }
 
-        return response()->json([
-            'message' => 'Nenhum produto foi encontrado.',
-            'success' => false
-        ], 404);
-    }
+        DB::beginTransaction();
+        try {
 
-    private function createNewOrder($table_id)
-    {
-        $newOrder = new Order();
-        $newOrder->table_id = $table_id;
-        $newOrder->status_payment = 1;
-        $newOrder->description_status = "Aberto";
+            foreach ($products as $product) {
+                $this->transferProduct($order, $product, $request->tableToTransferred);
+            }
+            DB::commit();
 
-        if ($newOrder->save()) {
-            return array(
+            return response()->json([
+                'message' => 'Itens transferidos com sucesso!',
                 'success' => true,
-                'newOrderId' => $newOrder->id
-            );
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'error' => 'Erro interno ao tentar realizar o pedido.'], 500);
+        }
+    }
+
+    private function transferProduct(Order $order, array $product, int $tableToTransferred)
+    {
+        $orderItem = OrderItems::where('order_id', $order->id)
+            ->where('product_id', $product['id'])
+            ->first();
+
+        if (!$orderItem) {
+            throw new \Exception('Nenhum item de pedido encontrado.');
         }
 
-        return array(
-            'success' => false,
+        $tableToTransf = Table::find($tableToTransferred);
+        if (!$tableToTransf || !in_array($tableToTransf->status, [0, 1])) {
+            throw new \Exception('Mesa de destino inválida.');
+        }
+
+        $orderTransferred = Order::firstOrCreate(
+            ['table_id' => $tableToTransferred, 'status_payment' => 1],
+            ['description_status' => 'Aberto']
         );
+
+        $orderTransferred->table_id = $tableToTransferred;
+        $orderTransferred->description_status = 'Aberto';
+
+        $this->updateOrderItems($orderItem, $product, $orderTransferred);
+
+        $this->updateOrderTotals($order);
+        $this->updateOrderTotals($orderTransferred);
+
+        $this->updateTable($tableToTransferred, 1, 'Aberta');
     }
 
-    private function createNewOrderItem($order_id, $product_id, $quantity, $table_id)
+    private function updateOrderItems($orderItem, $product, $orderTransferred)
     {
-        $newOrderItem = new OrderItems();
-        $productModel = Product::find($product_id);
+        $orderItemTransf = OrderItems::where('order_id', $orderTransferred->id)
+            ->where('product_id', $product['id'])
+            ->first();
 
-        if ($productModel) {
-            $newOrderItem->order_id = $order_id;
-            $newOrderItem->product_id = $product_id;
-            $newOrderItem->product_name = $productModel ? $productModel->name : null;
-            $newOrderItem->quantity = $quantity;
-            $newOrderItem->price = $productModel->price;
-            $newOrderItem->sub_total =  $productModel->price * $quantity;
-            $newOrderItem->table_id = $table_id;
+        if ($orderItemTransf) {
+            $orderItemTransf->quantity += $product['quantity'];
+            $orderItemTransf->sub_total = $orderItemTransf->price * $orderItemTransf->quantity;
+            $orderItemTransf->save();
 
-            if ($newOrderItem->save()) {
-                return true;
-            }
+            $this->updateComission($orderItemTransf->id, $product['quantity'], 'add');
+
+        } else {
+            $name = Product::find($product['id'])->name;
+
+            $newOrderItem = new OrderItems();
+
+            $newOrderItem->order_id = $orderTransferred->id;
+            $newOrderItem->product_id = $product['id'];
+            $newOrderItem->product_name = $name;
+            $newOrderItem->quantity = $product['quantity'];
+            $newOrderItem->price = Product::find($product['id'])->price;
+            $newOrderItem->sub_total = Product::find($product['id'])->price * $product['quantity'];
+            $newOrderItem->table_id = $orderTransferred->table_id;
+
+            $newOrderItem->save();
+
+            $this->createNewComission($orderItem->id, $newOrderItem->id, $product['quantity']);
         }
 
-        return false;
+        $orderItem->quantity -= $product['quantity'];
+        $this->updateComission($orderItem->id, $product['quantity'], 'remove');
+
+        if ($orderItem->quantity == 0) {
+            $orderItem->delete();
+        } else {
+            $orderItem->sub_total = $orderItem->price * $orderItem->quantity;
+            $orderItem->save();
+        }
     }
 
-    private function calculateTotalPrice($order_id)
+    private function updateOrderTotals($order)
     {
-        $order = Order::find($order_id);
+        $totalSubPrice = OrderItems::where('order_id', $order->id)->sum('sub_total');
+        $order->total_value = $totalSubPrice;
+        $order->save();
+    }
 
-        if ($order) {
-            if (OrderItems::where('order_id', $order_id)->exists()) {
-                $totalSubPrice = OrderItems::where('order_id', $order_id)->sum('sub_total');
+    private function updateTable($tableId, int $status, string $description)
+    {
+        $table = Table::find($tableId);
 
-                $order->total_value = $totalSubPrice;
+        if (!$table) {
+            throw new \Exception('Não foi encontrada a mesa de destino!');
+        }
 
-                if ($order->save()) {
-                    return true;
-                }
+        $table->status = $status;
+        $table->description_status = $description;
+        $table->save();
+    }
+
+    private function createNewComission($orderItemId, $newOrderItemId, $quantity)
+    {
+        $orderComission = Comission::where('order_item', $orderItemId)->first();
+
+        $comission = new Comission();
+        $comission->order_item = $newOrderItemId;
+        $comission->user_id = $orderComission->user_id;
+        $comission->quantity = $quantity;
+
+        $comission->save();
+    }
+
+    private function updateComission($orderItemId, $quantity, $method)
+    {
+        $orderComission = Comission::where('order_item', $orderItemId)->first();
+
+        if ($method === 'remove') {
+            $orderComission->quantity -= $quantity;
+
+            if ($orderComission->quantity == 0) {
+                $orderComission->delete();
             } else {
-
-                $table = Table::where('linked_table_id', $order->table_id)->get();
-
-                if ($table->isEmpty()) {
-                    $order->delete();
-                }
-                return true;
+                $orderComission->save();
             }
-            return false;
+        } else if ($method === 'add') {
+            $orderComission->quantity += $quantity;
+            $orderComission->save();
         }
     }
 }

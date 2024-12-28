@@ -29,12 +29,12 @@ class OrderService
 
             $order->total_value = OrderItems::where('order_id', $order->id)->sum('sub_total');
             $order->table_id = $tableId;
+            $order->description_status =  'Aberto';
             $order->save();
 
             DB::commit();
             return $order;
         } catch (\Exception $e) {
-            // dd($e);
             DB::rollBack();
             throw $e;
         }
@@ -50,6 +50,7 @@ class OrderService
         $objProduct = Product::find($product['id']);
 
         $orderItem->quantity += $product['quantity'];
+        $orderItem->price = $product['price'];
         $orderItem->sub_total = $orderItem->quantity * $product['price'];
         $orderItem->table_id += $tableId;
         $orderItem->product_name = $objProduct->name;
