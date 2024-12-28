@@ -35,6 +35,7 @@ class OrderService
             DB::commit();
             return $order;
         } catch (\Exception $e) {
+            dd($e);
             DB::rollBack();
             throw $e;
         }
@@ -52,7 +53,7 @@ class OrderService
         $orderItem->quantity += $product['quantity'];
         $orderItem->price = $product['price'];
         $orderItem->sub_total = $orderItem->quantity * $product['price'];
-        $orderItem->table_id += $tableId;
+        $orderItem->table_id = $tableId;
         $orderItem->product_name = $objProduct->name;
         $orderItem->save();
 
@@ -62,13 +63,22 @@ class OrderService
     private function addItemToComission($orderItemId, $userId)
     {
         $orderItem = OrderItems::find($orderItemId);
+
         if ($orderItem) {
 
             $comission = Comission::firstOrNew([
                 'order_item' => $orderItemId,
                 'user_id' => $userId,
             ]);
-            $comission->quantity = $orderItem->quantity;
+
+            $comissionsOrderItems  = Comission::where('order_item', $orderItemId)->where('user_id', '!=', $userId)->exists();
+
+            if ($comissionsOrderItems ) {
+                $quantity = Comission::where('order_item', $orderItemId)->where('user_id', '!=', $userId)->sum('quantity');
+                $comission->quantity = $orderItem->quantity - $quantity;
+            } else {
+                $comission->quantity = $orderItem->quantity;
+            }
             $comission->save();
         }
     }
