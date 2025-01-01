@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Comission;
 use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\Product;
@@ -233,7 +232,7 @@ class OrderController extends Controller
             $orderItemTransf->sub_total = $orderItemTransf->price * $orderItemTransf->quantity;
             $orderItemTransf->save();
 
-            $this->updateComission($orderItemTransf->id, $product['quantity'], 'add');
+            // $this->updateComission($orderItemTransf->id, $product['quantity'], 'add');
         } else {
             $name = Product::find($product['id'])->name;
 
@@ -249,11 +248,11 @@ class OrderController extends Controller
 
             $newOrderItem->save();
 
-            $this->createNewComission($orderItem->id, $newOrderItem->id, $product['quantity']);
+            // $this->createNewComission($orderItem->id, $newOrderItem->id, $product['quantity']);
         }
 
         $orderItem->quantity -= $product['quantity'];
-        $this->updateComission($orderItem->id, $product['quantity'], 'remove');
+        // $this->updateComission($orderItem->id, $product['quantity'], 'remove');
 
         if ($orderItem->quantity == 0) {
             $orderItem->delete();
@@ -281,35 +280,5 @@ class OrderController extends Controller
         $table->status = $status;
         $table->description_status = $description;
         $table->save();
-    }
-
-    private function createNewComission($orderItemId, $newOrderItemId, $quantity)
-    {
-        $orderComission = Comission::where('order_item', $orderItemId)->first();
-
-        $comission = new Comission();
-        $comission->order_item = $newOrderItemId;
-        $comission->user_id = $orderComission->user_id;
-        $comission->quantity = $quantity;
-
-        $comission->save();
-    }
-
-    private function updateComission($orderItemId, $quantity, $method)
-    {
-        $orderComission = Comission::where('order_item', $orderItemId)->first();
-
-        if ($method === 'remove') {
-            $orderComission->quantity -= $quantity;
-
-            if ($orderComission->quantity == 0) {
-                $orderComission->delete();
-            } else {
-                $orderComission->save();
-            }
-        } else if ($method === 'add') {
-            $orderComission->quantity += $quantity;
-            $orderComission->save();
-        }
     }
 }

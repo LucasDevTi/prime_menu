@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Comission;
+use App\Models\Commission;
 use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\Product;
@@ -61,25 +61,5 @@ class OrderService
     }
 
     private function addItemToComission($orderItemId, $userId)
-    {
-        $orderItem = OrderItems::find($orderItemId);
-
-        if ($orderItem) {
-
-            $comission = Comission::firstOrNew([
-                'order_item' => $orderItemId,
-                'user_id' => $userId,
-            ]);
-
-            $comissionsOrderItems  = Comission::where('order_item', $orderItemId)->where('user_id', '!=', $userId)->exists();
-
-            if ($comissionsOrderItems ) {
-                $quantity = Comission::where('order_item', $orderItemId)->where('user_id', '!=', $userId)->sum('quantity');
-                $comission->quantity = $orderItem->quantity - $quantity;
-            } else {
-                $comission->quantity = $orderItem->quantity;
-            }
-            $comission->save();
-        }
-    }
+    {}
 }

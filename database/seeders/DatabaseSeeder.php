@@ -25,11 +25,13 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Test2 User',
             'email' => 'test2@example.com',
+            'user_type' => 2
         ]);
 
         User::factory()->create([
             'name' => 'Test3 User',
             'email' => 'test3@example.com',
+            'user_type' => 2
         ]);
 
         Client::factory(10)->create();
