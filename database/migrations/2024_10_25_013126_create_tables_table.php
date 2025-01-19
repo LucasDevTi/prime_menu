@@ -18,7 +18,7 @@ return new class extends Migration
             // $table->integer('linked_table_id')->default(0);
             $table->integer('status')->nullable();
             $table->string('description_status')->nullable();
-            // $table->integer('user_id')->default(0);
+            $table->integer('user_id')->default(0);
 
             $table->timestamps();
         });

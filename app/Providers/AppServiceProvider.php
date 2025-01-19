@@ -52,7 +52,6 @@ class AppServiceProvider extends ServiceProvider
             return in_array($user->user_type, [1, 2, 3, 4]);
         });
 
-
         Gate::define('view-tables', function ($user) {
             return in_array($user->user_type, [1, 2, 3, 4]);
         });

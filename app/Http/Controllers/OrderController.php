@@ -47,6 +47,7 @@ class OrderController extends Controller
                 if ($table->status === 0) {
                     $table->status = 1;
                     $table->description_status = "Aberta";
+                    $table->user_id = Auth::id();
                     $table->save();
                 }
 
@@ -161,7 +162,7 @@ class OrderController extends Controller
         try {
 
             foreach ($products as $product) {
-                $this->transferProduct($order, $product, $request->tableToTransferred);
+                $this->transferProduct($order, $product, $request->tableToTransferred, $request->table_id);
             }
             DB::commit();
 
@@ -175,7 +176,7 @@ class OrderController extends Controller
         }
     }
 
-    private function transferProduct(Order $order, array $product, int $tableToTransferred)
+    private function transferProduct(Order $order, array $product, int $tableToTransferred, int $table_id)
     {
         $orderItem = OrderItems::where('order_id', $order->id)
             ->where('product_id', $product['id'])
@@ -198,7 +199,7 @@ class OrderController extends Controller
         $orderTransferred->table_id = $tableToTransferred;
         $orderTransferred->description_status = 'Aberto';
 
-        $this->updateOrderItems($orderItem, $product, $orderTransferred);
+        $this->updateOrderItems($orderItem, $product, $orderTransferred, $tableToTransferred, $table_id);
 
         $this->updateOrderTotals($order);
         $this->updateOrderTotals($orderTransferred);
@@ -221,38 +222,45 @@ class OrderController extends Controller
         }
     }
 
-    private function updateOrderItems($orderItem, $product, $orderTransferred)
-    {
+    private function updateOrderItems($orderItem, $product, $orderTransferred, $tableToTransferred, $table_id)
+    {   
         $orderItemTransf = OrderItems::where('order_id', $orderTransferred->id)
             ->where('product_id', $product['id'])
             ->first();
 
-        if ($orderItemTransf) {
+        $orderItem->quantity -= $product['quantity'];
+
+        $table = Table::find($table_id);
+        $userId = $table->user_id;
+
+        if ($orderItemTransf) { /* Se existir o item para a order_items de transferência */
+
             $orderItemTransf->quantity += $product['quantity'];
             $orderItemTransf->sub_total = $orderItemTransf->price * $orderItemTransf->quantity;
             $orderItemTransf->save();
+            $orderItemId = $orderItemTransf->id;
 
-            // $this->updateComission($orderItemTransf->id, $product['quantity'], 'add');
+            $this->orderService->addCommission($orderItemTransf->id, $product['quantity'], $userId);
+            $this->orderService->removeCommission($orderItem->id, $product['quantity'], $userId);
         } else {
-            $name = Product::find($product['id'])->name;
+            $product_db = Product::find($product['id']);
 
             $newOrderItem = new OrderItems();
 
             $newOrderItem->order_id = $orderTransferred->id;
             $newOrderItem->product_id = $product['id'];
-            $newOrderItem->product_name = $name;
+            $newOrderItem->product_name = $product_db['name'];
             $newOrderItem->quantity = $product['quantity'];
-            $newOrderItem->price = Product::find($product['id'])->price;
-            $newOrderItem->sub_total = Product::find($product['id'])->price * $product['quantity'];
+            $newOrderItem->price = $product_db['price'];
+            $newOrderItem->sub_total = $product_db['price'] * $product['quantity'];
             $newOrderItem->table_id = $orderTransferred->table_id;
 
             $newOrderItem->save();
+            $orderItemId = $newOrderItem->id;
 
-            // $this->createNewComission($orderItem->id, $newOrderItem->id, $product['quantity']);
+            $this->orderService->addCommission($newOrderItem->id, $product['quantity'], $userId);
+            $this->orderService->removeCommission($orderItem->id, $product['quantity'], $userId);
         }
-
-        $orderItem->quantity -= $product['quantity'];
-        // $this->updateComission($orderItem->id, $product['quantity'], 'remove');
 
         if ($orderItem->quantity == 0) {
             $orderItem->delete();

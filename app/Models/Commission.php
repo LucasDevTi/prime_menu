@@ -10,7 +10,8 @@ class Commission extends Model
     use HasFactory;
     
     protected $fillable = [
-        'order_item',
-        'user_id'
+        'order_item_id',
+        'user_id',
+        'quantity'
     ];
 }

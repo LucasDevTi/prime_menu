@@ -24,7 +24,6 @@ class OrderService
 
             foreach ($products as $product) {
                 $OrderItemId = $this->addItemToOrder($order, $product, $tableId);
-                $this->addItemToComission($OrderItemId, Auth::id());
             }
 
             $order->total_value = OrderItems::where('order_id', $order->id)->sum('sub_total');
@@ -35,7 +34,7 @@ class OrderService
             DB::commit();
             return $order;
         } catch (\Exception $e) {
-            dd($e);
+            // dd($e);
             DB::rollBack();
             throw $e;
         }
@@ -57,9 +56,37 @@ class OrderService
         $orderItem->product_name = $objProduct->name;
         $orderItem->save();
 
+        $this->addCommission($orderItem->id, $product['quantity'], Auth::id(), 0);
         return $orderItem->id;
     }
 
-    private function addItemToComission($orderItemId, $userId)
-    {}
+    /**
+     * Método responsável por adicionar a comissão do funcionário
+     * @return boolean
+     */
+    public function addCommission($orderItemId, $quantity, $userId)
+    {
+        $commission = Commission::where('order_item_id', $orderItemId)->where('user_id', $userId)->first();
+
+        if ($commission) {
+            $commission->quantity += $quantity;
+        } else {
+            $commission = new Commission();
+            $commission->quantity = $quantity;
+        }
+        $commission->order_item_id = $orderItemId;
+        $commission->user_id = $userId;
+        $commission->save();
+    }
+
+    public function removeCommission($orderItemId, $quantity, $userId)
+    {
+        $commission = Commission::where('order_item_id', $orderItemId)->where('user_id', $userId)->first();
+        if ($commission) {
+            $commission->quantity -= $quantity;
+            $commission->order_item_id = $orderItemId;
+            $commission->user_id = $userId;
+            $commission->save();
+        }
+    }
 }

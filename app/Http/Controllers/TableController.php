@@ -88,7 +88,8 @@ class TableController extends Controller
         }
 
         $mesa->status = $request->novo_status;
-
+        $mesa->user_id = Auth::id();
+        
         if ($mesa->save()) {
 
             // Caso existir mesas vinculadas
