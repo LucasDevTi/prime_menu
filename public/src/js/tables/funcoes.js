@@ -617,12 +617,12 @@ async function openModalChangeTable(table_id) {
                 const productElement = `
                 <div class="products-order-list">
                     <div class="item-da-mesa">                            
-                        <span><strong>${product.product_name} | quantidade: ${product.quantity}</strong></span>
+                        <span><strong>${product.product_name} | quantidade: ${product.quantity} | Funcionário: ${product.user_name}</strong></span>
                     </div>
                     <div class="content-qtde-transferencia">  
-                        <i class="fa fa-plus-circle plus-qtde" aria-hidden="true" onclick="addProductTransferencia(${product.product_id}, ${product.quantity}, ${table_id})"></i>
-                        <input type="number" class="form-control qtde-max-tranferencia" id="qtde-max-${product.product_id}" value="0" disabled>
-                        <i class="fa fa-minus-circle minus-qtde" aria-hidden="true" onclick="rmvProductTransferencia(${product.product_id}, ${product.quantity}, ${table_id})"></i>    
+                        <i class="fa fa-plus-circle plus-qtde" aria-hidden="true" onclick="addProductTransferencia(${product.product_id}, ${product.quantity}, ${table_id}, ${product.user_id})"></i>
+                        <input type="number" class="form-control qtde-max-tranferencia" id="qtde-max-${product.product_id}-${product.user_id}" value="0" disabled>
+                        <i class="fa fa-minus-circle minus-qtde" aria-hidden="true" onclick="rmvProductTransferencia(${product.product_id}, ${product.quantity}, ${table_id}, ${product.user_id})"></i>    
                     </div>
                 </div>
             `;
@@ -666,9 +666,9 @@ function handleChange(element) {
 }
 
 
-function addProductTransferencia(product_id, quantity, table_id) {
+function addProductTransferencia(product_id, quantity, table_id, user_id) {
     // Verifica se o produto já existe no array
-    let product = productsToTransferred.find(p => p.id === product_id);
+    let product = productsToTransferred.find(p => p.id === product_id && p.user_id === user_id);
     idCurrentTableTransferred = table_id;
 
     if (product) {
@@ -678,13 +678,13 @@ function addProductTransferencia(product_id, quantity, table_id) {
             product.quantity = quantity;
         }
 
-        document.getElementById(`qtde-max-${product_id}`).value = product.quantity
+        document.getElementById(`qtde-max-${product_id}-${user_id}`).value = product.quantity
 
     } else {
         // Se o produto não existir, cria um novo objeto e adiciona ao array
-        product = { id: product_id, quantity: 1 };
+        product = { id: product_id, quantity: 1, user_id: user_id };
         productsToTransferred.push(product);
-        document.getElementById(`qtde-max-${product_id}`).value = 1
+        document.getElementById(`qtde-max-${product_id}-${user_id}`).value = 1
 
     }
 
@@ -692,9 +692,9 @@ function addProductTransferencia(product_id, quantity, table_id) {
 
 }
 
-function rmvProductTransferencia(product_id, quantity, table_id) {
+function rmvProductTransferencia(product_id, quantity, table_id, user_id) {
     // Encontra o produto no array
-    let product = productsToTransferred.find(p => p.id === product_id);
+    let product = productsToTransferred.find(p => p.id === product_id && p.user_id === user_id);
     idCurrentTableTransferred = table_id;
 
     if (product && product.quantity > 0) {
@@ -703,9 +703,9 @@ function rmvProductTransferencia(product_id, quantity, table_id) {
         // Se a quantidade chegar a 0, remove o product do array
         if (product.quantity === 0) {
             productsToTransferred = productsToTransferred.filter(p => p.id !== product_id);
-            document.getElementById(`qtde-max-${product_id}`).value = 0
+            document.getElementById(`qtde-max-${product_id}-${user_id}`).value = 0
         }
-        document.getElementById(`qtde-max-${product_id}`).value = product.quantity
+        document.getElementById(`qtde-max-${product_id}-${user_id}`).value = product.quantity
 
     }
 
@@ -723,7 +723,7 @@ async function transferredItens(event) {
 
     let opcao = 0;
     console.log(productsJson)
-    console.log(idCurrentTableTransferred);
+    // console.log(idCurrentTableTransferred);
     const tableToTransferred = document.getElementById('tables-availables-transferred');
     for (let radio of radios) {
         if (radio.checked) {

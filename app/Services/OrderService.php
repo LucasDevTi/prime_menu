@@ -6,6 +6,7 @@ use App\Models\Commission;
 use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -23,7 +24,7 @@ class OrderService
             );
 
             foreach ($products as $product) {
-                $OrderItemId = $this->addItemToOrder($order, $product, $tableId);
+                $OrderItemId = $this->addItemToOrder($order, $product, $tableId, Auth::id());
             }
 
             $order->total_value = OrderItems::where('order_id', $order->id)->sum('sub_total');
@@ -40,23 +41,27 @@ class OrderService
         }
     }
 
-    private function addItemToOrder(Order $order, $product, $tableId)
+    private function addItemToOrder(Order $order, $product, $tableId, $user_id)
     {
         $orderItem = OrderItems::firstOrNew([
             'order_id' => $order->id,
-            'product_id' => $product['id']
+            'product_id' => $product['id'],
+            'user_id' => $user_id
         ]);
 
         $objProduct = Product::find($product['id']);
+        $objUser = User::find($user_id);
 
         $orderItem->quantity += $product['quantity'];
         $orderItem->price = $product['price'];
         $orderItem->sub_total = $orderItem->quantity * $product['price'];
         $orderItem->table_id = $tableId;
         $orderItem->product_name = $objProduct->name;
+        $orderItem->user_id = $user_id;
+        $orderItem->user_name = $objUser->name;
+
         $orderItem->save();
 
-        $this->addCommission($orderItem->id, $product['quantity'], Auth::id(), 0);
         return $orderItem->id;
     }
 

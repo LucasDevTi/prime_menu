@@ -62,7 +62,7 @@
               </div>
               <div class="card-body">
                 @if ($tables)
-                <div class="row">
+                <div class="row justify-content-center">
                   @foreach ($tables as $table)
                   <x-mesa :id="$table->id" :status="$table->status" :linked="$table->linked_table_id" :order="$table->openOrder" :totalprice="$table->totalPrice" />
                   @endforeach

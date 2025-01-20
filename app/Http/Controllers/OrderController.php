@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\Product;
 use App\Models\Table;
+use App\Models\User;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -79,17 +80,19 @@ class OrderController extends Controller
 
         // Buscar os produtos dos pedidos
         $orderItems = OrderItems::whereIn('order_id', $orders)->get();
-
+        // foreach($orderItems as $value){
+        //     dump($value->product_name);
+        // }
         // Consolidar produtos repetidos somando a quantidade
-        $consolidatedProducts = $orderItems->groupBy('product_id')->map(function ($items) {
-            return [
-                'product_id' => $items->first()->product_id,
-                'product_name' => $items->first()->product_name,
-                'quantity' => $items->sum('quantity'),
-                'sub_total' => $items->sum('sub_total'), // Opcional: somar o subtotal se necessário
-            ];
-        })->values();
-
+        // $consolidatedProducts = $orderItems->map(function ($items) {
+        //     return [
+        //         'product_id' => $items->first()->product_id,
+        //         'product_name' => $items->first()->product_name,
+        //         'quantity' => $items->sum('quantity'),
+        //         'sub_total' => $items->sum('sub_total'), // Opcional: somar o subtotal se necessário
+        //     ];
+        // })->values();
+        // dump($consolidatedProducts);    
 
         if ($table->linked_table_id) {
             $table_principal_id = $table->linked_table_id;
@@ -112,12 +115,12 @@ class OrderController extends Controller
                 ->get();
         }
 
-        if ($consolidatedProducts->isNotEmpty() && ($tables && $tables->isNotEmpty())) {
+        if ($orderItems && ($tables && $tables->isNotEmpty())) {
             return response()->json([
                 'message' => 'Itens do pedido encontrados com sucesso!',
                 'success' => true,
                 'status' => 'success',
-                'orderItems' => $consolidatedProducts,
+                'orderItems' => $orderItems,
                 'tables' => $tables
 
             ], 200);
@@ -160,7 +163,6 @@ class OrderController extends Controller
 
         DB::beginTransaction();
         try {
-
             foreach ($products as $product) {
                 $this->transferProduct($order, $product, $request->tableToTransferred, $request->table_id);
             }
@@ -178,8 +180,10 @@ class OrderController extends Controller
 
     private function transferProduct(Order $order, array $product, int $tableToTransferred, int $table_id)
     {
+
         $orderItem = OrderItems::where('order_id', $order->id)
             ->where('product_id', $product['id'])
+            ->where('user_id', $product['user_id'])
             ->first();
 
         if (!$orderItem) {
@@ -223,29 +227,23 @@ class OrderController extends Controller
     }
 
     private function updateOrderItems($orderItem, $product, $orderTransferred, $tableToTransferred, $table_id)
-    {   
+    {
+        $table = Table::find($table_id);
+        $userId = $product['user_id'];
         $orderItemTransf = OrderItems::where('order_id', $orderTransferred->id)
             ->where('product_id', $product['id'])
+            ->where('user_id', $userId)
             ->first();
 
-        $orderItem->quantity -= $product['quantity'];
-
-        $table = Table::find($table_id);
-        $userId = $table->user_id;
-
         if ($orderItemTransf) { /* Se existir o item para a order_items de transferência */
-
             $orderItemTransf->quantity += $product['quantity'];
             $orderItemTransf->sub_total = $orderItemTransf->price * $orderItemTransf->quantity;
             $orderItemTransf->save();
-            $orderItemId = $orderItemTransf->id;
-
-            $this->orderService->addCommission($orderItemTransf->id, $product['quantity'], $userId);
-            $this->orderService->removeCommission($orderItem->id, $product['quantity'], $userId);
         } else {
             $product_db = Product::find($product['id']);
 
             $newOrderItem = new OrderItems();
+            $objUser = User::find($userId);
 
             $newOrderItem->order_id = $orderTransferred->id;
             $newOrderItem->product_id = $product['id'];
@@ -254,13 +252,12 @@ class OrderController extends Controller
             $newOrderItem->price = $product_db['price'];
             $newOrderItem->sub_total = $product_db['price'] * $product['quantity'];
             $newOrderItem->table_id = $orderTransferred->table_id;
-
+            $newOrderItem->user_id = $userId;
+            $newOrderItem->user_name = $objUser->name;
             $newOrderItem->save();
-            $orderItemId = $newOrderItem->id;
-
-            $this->orderService->addCommission($newOrderItem->id, $product['quantity'], $userId);
-            $this->orderService->removeCommission($orderItem->id, $product['quantity'], $userId);
         }
+
+        $orderItem->quantity -= $product['quantity'];
 
         if ($orderItem->quantity == 0) {
             $orderItem->delete();
