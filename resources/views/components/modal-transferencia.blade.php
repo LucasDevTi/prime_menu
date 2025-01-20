@@ -14,10 +14,10 @@
                     <input type="hidden" id="current-table-transferred" name="current-table-transferred">
 
                     <div class="card-body" style="height:400px; overflow-y:scroll;">
-                        <div class="custom-control custom-radio">
+                        {{-- <div class="custom-control custom-radio">
                             <input class="custom-control-input" type="radio" id="transferred-all-itens" name="transferred-option" value="1" onchange="handleChange(this)">
                             <label for="transferred-all-itens" class="custom-control-label">Transferir todos os itens</label>
-                        </div>
+                        </div> --}}
                         <div class="custom-control custom-radio">
                             <input class="custom-control-input" type="radio" id="transfere-alguns" name="transferred-option" value="2" onchange="handleChange(this)">
                             <label for="transfere-alguns" class="custom-control-label">Escolher itens para trasferência</label>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Setup;
 use App\Models\Table;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,9 @@ class GestaoController extends Controller
         $tables->each(function ($table) {
             $table->totalPrice = $this->getTotalPriceByOrder($table);
         });
-        return view('gestao', compact('tables'));
+
+        $setup = Setup::find(1);
+        return view('gestao', compact('tables', 'setup'));
     }
 
 

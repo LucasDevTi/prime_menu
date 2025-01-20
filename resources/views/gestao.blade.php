@@ -1,4 +1,4 @@
-<x-layout>
+<x-layout :setupname="$setup->nome">
   <script src="{{asset('src/js/telefone.js')}}"></script>
   <script src="{{asset('src/js/funcoes.js')}}"></script>
 

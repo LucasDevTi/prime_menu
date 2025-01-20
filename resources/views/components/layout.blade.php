@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt_BR">
 
-<x-header />
+<x-header :setupname="$setupname" />
 
 <body class="hold-transition sidebar-mini">
     <div id="waiting" class="box-waiting">
@@ -15,7 +15,7 @@
 
         <x-navbar />
 
-        <x-menu />
+        <x-menu :setupname="$setupname" />
 
         <!-- Content Wrapper. Contains page content -->
         {{ $slot }}
